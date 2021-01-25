@@ -1,7 +1,7 @@
 {
-  "name": "service-name",
+  "name": "change-merger",
   "version": "1.0.0",
-  "description": "This is template for map colonies typescript service",
+  "description": "This service merges multiple change files into one, and converts",
   "main": "./src/index.ts",
   "scripts": {
     "test:unit": "jest --config=./tests/configurations/unit/jest.config.js",
