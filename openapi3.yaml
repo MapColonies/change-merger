@@ -1,7 +1,7 @@
 openapi: 3.0.1
 info:
-  title: service-name
-  description: basic template for map colonies service
+  title: change-merger
+  description: Simple service for merging multiple OSM changes into one
   version: 1.0.0
   license:
     name: MIT
@@ -9,31 +9,24 @@ info:
 servers:
   - url: http://localhost:8080
 paths:
-  /resourceName:
-    get:
-      operationId: getResourceName
+  /change/merge:
+    post:
+      operationId: mergeChanges
+      summary: merges incoming changes into a single change
       tags:
-        - resourceName
-      summary: gets the resource
+        - 'change'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeElements'
       responses:
         200:
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/resource'
-    post:
-      operationId: createResource
-      tags:
-        - resourceName
-      summary: creates a new record of type resource
-      responses:
-        201:
-          description: created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/resource'
+                $ref: '#/components/schemas/ResponseSchema'
         400:
           description: Bad Request
           content:
@@ -49,17 +42,153 @@ components:
       properties:
         message:
           type: string
-    resource:
+    osmId:
+      type: integer
+      format: int64
+      minimum: 0
+      example: 666
+      exclusiveMinimum: true
+    tempOsmId:
+      type: integer
+      format: int64
+      maximum: 0
+      example: -666
+      exclusiveMaximum: true
+    externalId:
+      type: string
+      example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+      minLength: 1
+      maxLength: 68
+    BaseOsmElement:
       type: object
       required:
+        - type
         - id
-        - name
-        - description
       properties:
+        type:
+          type: string
+          enum:
+            - node
+            - way
+            - relation
         id:
+          $ref: '#/components/schemas/osmId'
+        timestamp:
+          type: string
+        version:
           type: number
-          format: int64
-        name:
+        changeset:
+          type: number
+        user:
           type: string
-        description:
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+    OsmNode:
+      allOf:
+        - $ref: '#/components/schemas/BaseOsmElement'
+        - type: object
+          required:
+            - lat
+            - lon
+          properties:
+            type:
+              type: string
+              enum:
+                - node
+            lat:
+              type: number
+            lon:
+              type: number
+    OsmWay:
+      allOf:
+        - $ref: '#/components/schemas/BaseOsmElement'
+        - type: object
+          required:
+            - nodes
+          properties:
+            type:
+              type: string
+              enum:
+                - way
+            nodes:
+              type: array
+              items:
+                $ref: '#/components/schemas/OsmNode'
+    OsmElement:
+      oneOf:
+        - $ref: '#/components/schemas/OsmNode'
+        - $ref: '#/components/schemas/OsmWay'
+    OsmChange:
+      type: object
+      required:
+        - type
+      properties:
+        type:
           type: string
+          enum:
+            - osmchange
+        version:
+          type: string
+        generator:
+          type: string
+        create:
+          type: array
+          items:
+            $ref: '#/components/schemas/OsmElement'
+        modify:
+          type: array
+          items:
+            $ref: '#/components/schemas/OsmElement'
+        delete:
+          type: array
+          items:
+            $ref: '#/components/schemas/OsmElement'
+    ChangeElement:
+      type: object
+      properties:
+        externalId:
+          $ref: '#/components/schemas/externalId'
+        action:
+          type: string
+          enum:
+            - Create
+            - Modify
+            - Delete
+        change:
+          $ref: '#/components/schemas/OsmChange'
+        tempOsmId:
+          $ref: '#/components/schemas/tempOsmId'
+      required:
+        - externalId
+        - action
+        - change
+    ChangeElements:
+      type: array
+      items:
+        $ref: '#/components/schemas/ChangeElement'
+    IdMapping:
+      type: object
+      required:
+        - externalId
+        - tempOsmId
+      properties:
+        externalId:
+          $ref: '#/components/schemas/externalId'
+        tempOsmId:
+          $ref: '#/components/schemas/tempOsmId'
+
+    ResponseSchema:
+      type: object
+      properties:
+        change:
+          $ref: '#/components/schemas/OsmChange'
+        created:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdMapping'
+        deleted:
+          type: array
+          items:
+            $ref: '#/components/schemas/externalId'
