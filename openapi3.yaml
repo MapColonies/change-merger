@@ -1,7 +1,7 @@
 openapi: 3.0.1
 info:
-  title: service-name
-  description: basic template for map colonies service
+  title: change-merger
+  description: Simple service for merging multiple OSM changes into one
   version: 1.0.0
   license:
     name: MIT
@@ -13,6 +13,8 @@ paths:
     post:
       operationId: mergeChanges
       summary: merges incoming changes into a single change
+      tags:
+        - "change"
       requestBody:
         content:
           application/json:
