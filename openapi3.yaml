@@ -14,7 +14,7 @@ paths:
       operationId: mergeChanges
       summary: merges incoming changes into a single change
       tags:
-        - "change"
+        - 'change'
       requestBody:
         content:
           application/json:
