@@ -6,7 +6,7 @@ import { container, inject, injectable } from 'tsyringe';
 import { RequestLogger } from './common/middlewares/RequestLogger';
 import { Services } from './common/constants';
 import { IConfig, ILogger } from './common/interfaces';
-import { resourceNameRouterFactory } from './resourceName/routes/resourceNameRouter';
+import { changeRouterFactory } from './change/routes/changeRouter';
 import { openapiRouterFactory } from './common/routes/openapi';
 
 @injectable()
@@ -30,7 +30,7 @@ export class ServerBuilder {
   }
 
   private buildRoutes(): void {
-    this.serverInstance.use('/resourceName', resourceNameRouterFactory(container));
+    this.serverInstance.use('/change', changeRouterFactory(container));
     this.serverInstance.use('/', openapiRouterFactory(container));
   }
 

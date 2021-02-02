@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`change Happy Path should return 200 status code and the resource 1`] = `
+Object {
+  "change": "<osmChange generator=\\"change-merger\\" version=\\"0.6\\"><create><node id=\\"-1\\" version=\\"0\\" lon=\\"24\\" lat=\\"24\\" changeset=\\"3\\"><tag k=\\"cat\\" v=\\"bark\\"></tag></node><node id=\\"-2\\" version=\\"0\\" lon=\\"25\\" lat=\\"25\\" changeset=\\"3\\"></node><node id=\\"-3\\" version=\\"0\\" lon=\\"26\\" lat=\\"26\\" changeset=\\"3\\"></node><node id=\\"-5\\" version=\\"0\\" lon=\\"24\\" lat=\\"24\\" changeset=\\"3\\"><tag k=\\"cat\\" v=\\"bark\\"></tag></node><way id=\\"-4\\" version=\\"0\\" changeset=\\"3\\"><nd ref=\\"-1\\"></nd><nd ref=\\"-2\\"></nd><nd ref=\\"-3\\"></nd></way></create><modify><way id=\\"1\\" version=\\"0\\" changeset=\\"3\\"><nd ref=\\"-5\\"></nd><nd ref=\\"3\\"></nd><nd ref=\\"4\\"></nd></way></modify><delete><node id=\\"-6\\" version=\\"0\\" lon=\\"24\\" lat=\\"24\\" changeset=\\"3\\"><tag k=\\"cat\\" v=\\"bark\\"></tag></node></delete></osmChange>",
+  "created": Array [
+    Object {
+      "externalId": "a",
+      "tempOsmId": -4,
+    },
+  ],
+  "deleted": Array [
+    "c",
+  ],
+}
+`;

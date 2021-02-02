@@ -19,7 +19,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ChangeElements'
+              $ref: '#/components/schemas/RequestSchema'
       responses:
         200:
           description: OK
@@ -45,9 +45,7 @@ components:
     osmId:
       type: integer
       format: int64
-      minimum: 0
       example: 666
-      exclusiveMinimum: true
     tempOsmId:
       type: integer
       format: int64
@@ -153,9 +151,9 @@ components:
         action:
           type: string
           enum:
-            - Create
-            - Modify
-            - Delete
+            - create
+            - modify
+            - delete
         change:
           $ref: '#/components/schemas/OsmChange'
         tempOsmId:
@@ -164,10 +162,6 @@ components:
         - externalId
         - action
         - change
-    ChangeElements:
-      type: array
-      items:
-        $ref: '#/components/schemas/ChangeElement'
     IdMapping:
       type: object
       required:
@@ -178,6 +172,20 @@ components:
           $ref: '#/components/schemas/externalId'
         tempOsmId:
           $ref: '#/components/schemas/tempOsmId'
+    RequestSchema:
+      type: object
+      required:
+        - 'changes'
+        - 'changesetId'
+      properties:
+        changes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChangeElement'
+        changesetId:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
 
     ResponseSchema:
       type: object
