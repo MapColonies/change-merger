@@ -1,13 +1,13 @@
 import httpStatusCodes from 'http-status-codes';
 import { container } from 'tsyringe';
 import { MergeChangesRequestBody } from '../../../src/change/controllers/changeController';
-import { RequestChangeObject } from '../../../src/change/models/types';
+import { ChangeWithMetadata } from '../../../src/change/models/types';
 import { getSampleData } from '../../sampleData';
 
 import { registerTestValues } from '../testContainerConfig';
 import * as requestSender from './helpers/requestSender';
 
-describe('resourceName', function () {
+describe('change', function () {
   beforeAll(function () {
     registerTestValues();
     requestSender.init();
@@ -54,7 +54,7 @@ describe('resourceName', function () {
     it('should fail if externalId is missing', async function () {
       const changes = getSampleData();
       const { externalId, ...newChange } = changes[0];
-      changes[0] = newChange as RequestChangeObject;
+      changes[0] = newChange as ChangeWithMetadata;
       const requestBody = ({ changesetId: 1, changes: changes } as unknown) as MergeChangesRequestBody;
 
       const response = await requestSender.postMergeChanges(requestBody);

@@ -1,6 +1,6 @@
 import { OsmNode, OsmWay } from '@map-colonies/node-osm-elements';
 import faker from 'faker';
-import { createOsmXmlNode, createOsmXmlTag, createOsmXmlWay } from '../../../../src/change/models/creators';
+import { createOsmXmlNode, createOsmXmlTag, createOsmXmlWay } from '../../../../src/change/models/generators';
 
 describe('creators', function () {
   describe('#createOsmXmlTag', function () {
@@ -25,7 +25,7 @@ describe('creators', function () {
         type: 'node',
         id: faker.random.number({ min: 1 }),
         lat: faker.random.number({ min: -90, max: 90, precision: 2 }),
-        lon: faker.random.number({ min: -90, max: 90, precision: 2 }),
+        lon: faker.random.number({ min: -180, max: 180, precision: 2 }),
         version: faker.random.number({ min: 1, max: 100 }),
         tags: { a: '1' },
       };

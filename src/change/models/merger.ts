@@ -1,7 +1,8 @@
 import { BaseElement, OsmNode, OsmWay } from '@map-colonies/node-osm-elements';
+import { SERVICE_NAME } from '../../common/constants';
 import { IdGenerator } from '../utils/idGenerator';
-import { createOsmXmlNode, createOsmXmlWay } from './creators';
-import { IdMapping, RequestChangeObject, OsmXmlChange, OsmXmlNode, OsmXmlWay } from './types';
+import { createOsmXmlNode, createOsmXmlWay } from './generators';
+import { IdMapping, ChangeWithMetadata, OsmXmlChange, OsmXmlNode, OsmXmlWay } from './types';
 
 const isNode = (element: BaseElement): element is OsmNode => element.type === 'node';
 const isWay = (element: BaseElement): element is OsmWay => element.type === 'way';
@@ -37,13 +38,13 @@ const handleChangeArray = (
   return [nodes, xmlWay];
 };
 
-const handleChangeObj = (incomingChangeObj: RequestChangeObject, idGenerator: IdGenerator, change: OsmXmlChange, changesetId: number): number => {
+const handleChangeObj = (changeObj: ChangeWithMetadata, idGenerator: IdGenerator, change: OsmXmlChange, changesetId: number): number => {
   const tempMapping = new Map<number, number>();
 
-  const actions: typeof incomingChangeObj.action[] = ['create', 'modify', 'delete'];
+  const actions: typeof changeObj.action[] = ['create', 'modify', 'delete'];
 
   actions.forEach((action) => {
-    const elementArr = incomingChangeObj.change[action];
+    const elementArr = changeObj.change[action];
     if (elementArr) {
       const [nodes, way] = handleChangeArray(elementArr, idGenerator, tempMapping, changesetId);
       change[action].node.push(...nodes);
@@ -53,13 +54,13 @@ const handleChangeObj = (incomingChangeObj: RequestChangeObject, idGenerator: Id
     }
   });
 
-  return incomingChangeObj.tempOsmId !== undefined ? (tempMapping.get(incomingChangeObj.tempOsmId) as number) : 0;
+  return changeObj.tempOsmId !== undefined ? (tempMapping.get(changeObj.tempOsmId) as number) : 0;
 };
 
-const mergeChanges = (changes: RequestChangeObject[], changesetId: number): [OsmXmlChange, IdMapping[], string[]] => {
+const mergeChanges = (changes: ChangeWithMetadata[], changesetId: number): [OsmXmlChange, IdMapping[], string[]] => {
   const idGenerator = new IdGenerator();
   const change: OsmXmlChange = {
-    generator: 'change-merger',
+    generator: SERVICE_NAME,
     version: '0.6',
     create: { node: [], way: [] },
     modify: { node: [], way: [] },

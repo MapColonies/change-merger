@@ -1,8 +1,20 @@
 import { OsmChange } from '@map-colonies/node-osm-elements';
 
+interface IdMapping {
+  externalId: string;
+  tempOsmId: number;
+}
+
 interface OsmXmlTag {
   k: string;
   v: string;
+}
+
+interface ChangeWithMetadata {
+  externalId: string;
+  change: OsmChange;
+  tempOsmId?: number;
+  action: 'create' | 'modify' | 'delete';
 }
 
 interface OsmXmlBase {
@@ -26,29 +38,13 @@ interface ChangeActionObj {
   way: OsmXmlWay[];
 }
 
-export interface OsmXmlChange {
+ interface OsmXmlChange {
   version: '0.6';
-  generator: 'change-merger';
+  generator: string;
   create: ChangeActionObj;
   modify: ChangeActionObj;
   delete: ChangeActionObj;
 }
-export interface IdMapping {
-  externalId: string;
-  tempOsmId: number;
-}
 
-export interface RequestChangeObject {
-  externalId: string;
-  change: OsmChange;
-  tempOsmId?: number;
-  action: 'create' | 'modify' | 'delete';
-}
 
-export interface ResponseChangeObject {
-  change: string;
-  created: IdMapping[];
-  deleted: string[];
-}
-
-export { OsmXmlNode, OsmXmlWay, OsmXmlTag };
+export { OsmXmlNode, OsmXmlWay, OsmXmlTag, OsmXmlChange, ChangeWithMetadata, IdMapping };

@@ -1,11 +1,11 @@
 import { BaseElement } from '@map-colonies/node-osm-elements';
 import { mergeChanges } from '../../../../src/change/models/merger';
-import { RequestChangeObject } from '../../../../src/change/models/types';
+import { ChangeWithMetadata } from '../../../../src/change/models/types';
 
 describe('merger', function () {
   describe('#mergeChanges', function () {
     it('merge two changes into one', function () {
-      const incomingChanges: RequestChangeObject[] = [
+      const incomingChanges: ChangeWithMetadata[] = [
         {
           action: 'create',
           tempOsmId: -5,
@@ -42,7 +42,7 @@ describe('merger', function () {
     });
 
     it('should keep the order, but change the temp id of node in way', function () {
-      const incomingChanges: RequestChangeObject[] = [
+      const incomingChanges: ChangeWithMetadata[] = [
         {
           action: 'modify',
           tempOsmId: 0,
@@ -74,7 +74,7 @@ describe('merger', function () {
     });
 
     it('should add the externalId to delete to the delete list', function () {
-      const incomingChanges: RequestChangeObject[] = [
+      const incomingChanges: ChangeWithMetadata[] = [
         {
           action: 'delete',
           tempOsmId: 0,
@@ -86,7 +86,7 @@ describe('merger', function () {
         },
       ];
 
-      const [mergedChange, idsToCreate, idsToDelete] = mergeChanges(incomingChanges, 1);
+      const [,, idsToDelete] = mergeChanges(incomingChanges, 1);
 
       expect(idsToDelete[0]).toEqual('c');
     });

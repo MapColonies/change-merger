@@ -1,7 +1,7 @@
 import { BaseElement } from '@map-colonies/node-osm-elements';
-import { RequestChangeObject } from '../src/change/models/types';
+import { ChangeWithMetadata } from '../src/change/models/types';
 
-export const getSampleData = (): RequestChangeObject[] => [
+export const getSampleData = (): ChangeWithMetadata[] => [
   {
     action: 'create',
     tempOsmId: -1,
