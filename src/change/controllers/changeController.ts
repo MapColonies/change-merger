@@ -7,12 +7,14 @@ import { ILogger } from '../../common/interfaces';
 import { ChangeManager } from '../models/changeManager';
 import { ChangeWithMetadata, IdMapping } from '../models/types';
 
-type MergeChangesHandler = RequestHandler<undefined, ResponseChangeObject, MergeChangesRequestBody>;
 interface ResponseChangeObject {
   change: string;
   created: IdMapping[];
   deleted: string[];
 }
+
+type MergeChangesHandler = RequestHandler<undefined, ResponseChangeObject, MergeChangesRequestBody>;
+
 export interface MergeChangesRequestBody {
   changesetId: number;
   changes: ChangeWithMetadata[];
