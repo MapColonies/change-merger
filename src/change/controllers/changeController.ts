@@ -24,6 +24,6 @@ export class ChangeController {
 
   public mergeChanges: MergeChangesHandler = (req, res) => {
     const [change, created, deleted] = this.manager.mergeChanges(req.body.changes, req.body.changesetId);
-    return res.status(httpStatus.OK).json({change, created, deleted});
+    return res.status(httpStatus.OK).json({ change, created, deleted });
   };
 }

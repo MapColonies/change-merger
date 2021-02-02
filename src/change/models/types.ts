@@ -38,13 +38,12 @@ interface ChangeActionObj {
   way: OsmXmlWay[];
 }
 
- interface OsmXmlChange {
+interface OsmXmlChange {
   version: '0.6';
   generator: string;
   create: ChangeActionObj;
   modify: ChangeActionObj;
   delete: ChangeActionObj;
 }
-
 
 export { OsmXmlNode, OsmXmlWay, OsmXmlTag, OsmXmlChange, ChangeWithMetadata, IdMapping };

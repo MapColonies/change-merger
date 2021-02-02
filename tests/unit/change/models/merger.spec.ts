@@ -86,7 +86,7 @@ describe('merger', function () {
         },
       ];
 
-      const [,, idsToDelete] = mergeChanges(incomingChanges, 1);
+      const [, , idsToDelete] = mergeChanges(incomingChanges, 1);
 
       expect(idsToDelete[0]).toEqual('c');
     });
