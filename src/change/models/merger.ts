@@ -64,7 +64,7 @@ const mergeChanges = (changes: ChangeWithMetadata[], changesetId: number): [OsmX
     version: '0.6',
     create: { node: [], way: [] },
     modify: { node: [], way: [] },
-    delete: { node: [], way: [] },
+    delete: { way: [], node: [] },
   };
   const idsToAdd: IdMapping[] = [];
   const idsToDelete: string[] = [];
