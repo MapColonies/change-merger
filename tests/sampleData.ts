@@ -50,7 +50,22 @@ export const getSampleData = (): ChangeWithMetadata[] => [
     externalId: 'c',
     change: {
       type: 'osmchange',
-      delete: ([{ id: -2, type: 'node', version: 0, lon: 24, lat: 24, tags: { cat: 'bark' } }] as unknown) as BaseElement[],
+      delete: ([
+        { id: 1, type: 'node', version: 0, lon: 24, lat: 24, tags: { cat: 'bark' } },
+        { id: 6, type: 'node', version: 0, lon: 24, lat: 24, tags: { cat: 'bark' } },
+        { id: 7, type: 'node', version: 0, lon: 25, lat: 25 },
+        { id: 8, type: 'node', version: 0, lon: 26, lat: 26 },
+        {
+          id: 5,
+          type: 'way',
+          version: 0,
+          nodes: [
+            { id: 6, type: 'node', version: 0, lon: 24, lat: 24, tags: { cat: 'bark' } },
+            { id: 7, type: 'node', version: 0, lon: 25, lat: 25 },
+            { id: 8, type: 'node', version: 0, lon: 26, lat: 26 },
+          ],
+        },
+      ] as unknown) as BaseElement[],
     },
   },
 ];
