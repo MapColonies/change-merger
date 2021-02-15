@@ -65,6 +65,8 @@ const mergeChanges = (changes: ChangeWithMetadata[], changesetId: number): [OsmX
     create: { node: [], way: [] },
     modify: { node: [], way: [] },
     // the order is important, nodes first in create, last in delete.
+    // in osmchange, when deleting a way, you first need to delete the way before the nodes
+    // because otherwise the nodes are already in used.
     delete: { way: [], node: [] },
   };
   const idsToAdd: IdMapping[] = [];
