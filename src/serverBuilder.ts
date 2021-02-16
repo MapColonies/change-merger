@@ -1,13 +1,13 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import { getErrorHandlerMiddleware } from '@map-colonies/error-express-handler';
+import { OpenapiViewerRouter, OpenapiRouterConfig } from '@map-colonies/openapi-express-viewer';
 import { middleware as OpenApiMiddleware } from 'express-openapi-validator';
 import { container, inject, injectable } from 'tsyringe';
 import { RequestLogger } from './common/middlewares/RequestLogger';
 import { Services } from './common/constants';
 import { IConfig, ILogger } from './common/interfaces';
 import { changeRouterFactory } from './change/routes/changeRouter';
-import { openapiRouterFactory } from './common/routes/openapi';
 
 @injectable()
 export class ServerBuilder {
@@ -30,8 +30,14 @@ export class ServerBuilder {
   }
 
   private buildRoutes(): void {
+    this.buildDocsRoutes();
     this.serverInstance.use('/change', changeRouterFactory(container));
-    this.serverInstance.use('/', openapiRouterFactory(container));
+  }
+
+  private buildDocsRoutes(): void {
+    const openapiRouter = new OpenapiViewerRouter(this.config.get<OpenapiRouterConfig>('openapiConfig'));
+    openapiRouter.setup();
+    this.serverInstance.use(this.config.get<string>('openapiConfig.basePath'), openapiRouter.getRouter());
   }
 
   private registerPreRoutesMiddleware(): void {
