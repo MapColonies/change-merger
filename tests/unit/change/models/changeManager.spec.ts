@@ -11,5 +11,17 @@ describe('changeManager', function () {
 
       expect(change).toMatchSnapshot();
     });
+
+    it('should encode strings using html encoding', function () {
+      const manager = new ChangeManager({ log: jest.fn() });
+      const changes = getSampleData();
+      const tags = changes[0].change.create?.[0].tags;
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      tags!.html = "< > \" ' & © ∆ 🄯";
+
+      const change = manager.mergeChanges(changes, 2);
+
+      expect(change).toMatchSnapshot();
+    });
   });
 });
