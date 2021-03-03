@@ -17,7 +17,7 @@ describe('changeManager', function () {
       const changes = getSampleData();
       const tags = changes[0].change.create?.[0].tags;
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      tags!.html = "< > \" ' & © ∆ 🄯";
+      tags!.html = '< > " \' & © ∆ 🄯';
 
       const change = manager.mergeChanges(changes, 2);
 
