@@ -1,20 +1,14 @@
-import { j2xParser } from 'fast-xml-parser';
+import { J2xOptions, j2xParser } from 'fast-xml-parser';
+import { encode } from 'html-entities';
 import { OsmXmlChange } from '../models/types';
 
-const options = {
+const options: Partial<J2xOptions> = {
   attributeNamePrefix: '',
   textNodeName: '#text',
   ignoreAttributes: false,
-  ignoreNameSpace: false,
-  allowBooleanAttributes: false,
-  parseNodeValue: false,
-  parseAttributeValue: false,
-  trimValues: true,
   cdataTagName: '__cdata', //default is 'false'
   cdataPositionChar: '\\c',
-  parseTrueNumberOnly: false,
-  arrayMode: false, //"strict"
-  stopNodes: ['parse-me-as-string'],
+  attrValueProcessor: (value) => encode(value),
 };
 
 const parser = new j2xParser(options);
