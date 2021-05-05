@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.1](https://github.com/MapColonies/change-merger/compare/v1.0.0...v1.0.1) (2021-05-05)
+
+
+### Bug Fixes
+
+* **configurations:** removed servers list from openapi3.yml ([cf56840](https://github.com/MapColonies/change-merger/commit/cf5684069190be8c2102f1e41e3ceaddf4adf128))
+
 ## 1.0.0 (2021-05-03)
 
 
