@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0](https://github.com/MapColonies/change-merger/compare/v1.0.2...v1.1.0) (2021-05-24)
+
+
+### Features
+
+* **configurations:** added otel support of tracing and metrics ([#35](https://github.com/MapColonies/change-merger/issues/35)) ([2ab4fae](https://github.com/MapColonies/change-merger/commit/2ab4fae566b591d66a2da3d786074b33645a61bc))
+* **configurations:** updates openapi3 version on release ([22402b3](https://github.com/MapColonies/change-merger/commit/22402b33a77e300d6639ffff3cf4738499475fc4))
+
 ### [1.0.2](https://github.com/MapColonies/change-merger/compare/v1.0.1...v1.0.2) (2021-05-05)
 
 
