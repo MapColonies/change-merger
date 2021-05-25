@@ -2,31 +2,30 @@ openapi: 3.0.1
 info:
   title: change-merger
   description: Simple service for merging multiple OSM changes into one
-  version: 1.0.2
+  version: 1.1.1
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
-
 paths:
   /change/merge:
     post:
       operationId: mergeChanges
       summary: merges incoming changes into a single change
       tags:
-        - 'change'
+        - change
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/RequestSchema'
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ResponseSchema'
-        400:
+        '400':
           description: Bad Request
           content:
             application/json:
@@ -174,8 +173,8 @@ components:
     RequestSchema:
       type: object
       required:
-        - 'changes'
-        - 'changesetId'
+        - changes
+        - changesetId
       properties:
         changes:
           type: array
@@ -185,7 +184,6 @@ components:
           type: number
           minimum: 0
           exclusiveMinimum: true
-
     ResponseSchema:
       type: object
       properties:
