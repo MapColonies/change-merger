@@ -1,6 +1,7 @@
 // this import must be called before the first import of tsyring
 import 'reflect-metadata';
 import './common/tracing';
+import { createServer } from 'http';
 import { container } from 'tsyringe';
 import { get } from 'config';
 import { Logger } from '@map-colonies/js-logger';
@@ -15,8 +16,8 @@ const app = getApp();
 
 const logger = container.resolve<Logger>(Services.LOGGER);
 const stubHealthcheck = async (): Promise<void> => Promise.resolve();
-createTerminus(app, { healthChecks: { '/liveness': stubHealthcheck }, onSignal: container.resolve('onSignal') });
+const server = createTerminus(createServer(app), { healthChecks: { '/liveness': stubHealthcheck }, onSignal: container.resolve('onSignal') });
 
-app.listen(port, () => {
+server.listen(port, () => {
   logger.info(`app started on port ${port}`);
 });
