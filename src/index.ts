@@ -14,7 +14,8 @@ const port: number = parseInt(serverConfig.port) || DEFAULT_SERVER_PORT;
 const app = getApp();
 
 const logger = container.resolve<Logger>(Services.LOGGER);
-createTerminus(app, { healthChecks: { '/liveness': true }, onSignal: container.resolve('onSignal') });
+const stubHealthcheck = async (): Promise<void> => Promise.resolve();
+createTerminus(app, { healthChecks: { '/liveness': stubHealthcheck }, onSignal: container.resolve('onSignal') });
 
 app.listen(port, () => {
   logger.info(`app started on port ${port}`);
