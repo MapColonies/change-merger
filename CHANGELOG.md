@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.2](https://github.com/MapColonies/change-merger/compare/v1.1.0...v1.1.2) (2021-06-06)
+
+
+### Bug Fixes
+
+* **configurations:** fixed broken liveness ([#38](https://github.com/MapColonies/change-merger/issues/38)) ([f4158e9](https://github.com/MapColonies/change-merger/commit/f4158e95f070e51f011ad354b1ebdb14a757dcec))
+
 ### [1.1.1](https://github.com/MapColonies/change-merger/compare/v1.1.0...v1.1.1) (2021-05-25)
 
 ## [1.1.0](https://github.com/MapColonies/change-merger/compare/v1.0.2...v1.1.0) (2021-05-24)
