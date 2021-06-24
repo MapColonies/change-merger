@@ -1,0 +1,43 @@
+global:
+  cloudProvider: {}
+  environment: {}
+  tracing: {}
+  metrics: {}
+
+enabled: true
+
+environment: development
+
+image:
+  repository: change-merger
+  tag: 'latest'
+
+replicaCount: 1
+
+env:
+  port: 8080
+  targetPort: 8080
+  protocol: TCP
+  logLevel: info
+  requestPayloadLimit: 5mb
+  logPrettyPrintEnabled: false
+  responseCompressionEnabled: true
+  tracing:
+    enabled: false
+    url: http://localhost:55681/v1/trace
+  metrics:
+    enabled: false
+    url: http://localhost:55681/v1/metrics
+initialDelaySeconds: 60
+resources:
+  enabled: false
+  value:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+route:
+  enabled: true
+  path: /
