@@ -7,10 +7,10 @@ import { middleware as OpenApiMiddleware } from 'express-openapi-validator';
 import { container, inject, injectable } from 'tsyringe';
 import { Logger } from '@map-colonies/js-logger';
 import httpLogger from '@map-colonies/express-access-log-middleware';
+import { getTraceContexHeaderMiddleware } from '@map-colonies/telemetry';
 import { Services } from './common/constants';
 import { IConfig } from './common/interfaces';
 import { changeRouterFactory } from './change/routes/changeRouter';
-
 @injectable()
 export class ServerBuilder {
   private readonly serverInstance = express();
@@ -44,6 +44,7 @@ export class ServerBuilder {
     }
     this.serverInstance.use(httpLogger({ logger: this.logger }));
     this.serverInstance.use(express.json(this.config.get<bodyParser.Options>('server.request.payload')));
+    this.serverInstance.use(getTraceContexHeaderMiddleware());
 
     const ignorePathRegex = new RegExp(`^${this.config.get<string>('openapiConfig.basePath')}/.*`, 'i');
     const apiSpecPath = this.config.get<string>('openapiConfig.filePath');
