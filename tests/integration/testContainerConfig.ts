@@ -8,7 +8,7 @@ function registerTestValues(): void {
   container.register(Services.CONFIG, { useValue: config });
   container.register(Services.LOGGER, { useValue: jsLogger({ enabled: false }) });
 
-  const tracing = new Tracing('app_tracer');
+  const tracing = new Tracing();
   const tracer = tracing.start();
   container.register(Services.TRACER, { useValue: tracer });
 
