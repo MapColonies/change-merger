@@ -2,18 +2,20 @@ import { container } from 'tsyringe';
 import config from 'config';
 import { logMethod, Metrics } from '@map-colonies/telemetry';
 import jsLogger, { LoggerOptions } from '@map-colonies/js-logger';
+import { trace } from '@opentelemetry/api';
 import { tracing } from './common/tracing';
 import { Services } from './common/constants';
 
 function registerExternalValues(): void {
-  const loggerConfig = config.get<LoggerOptions>('logger');
+  const loggerConfig = config.get<LoggerOptions>('telemetry.logger');
   // @ts-expect-error the signature is wrong
   const logger = jsLogger({ ...loggerConfig, prettyPrint: false, hooks: { logMethod } });
 
   container.register(Services.CONFIG, { useValue: config });
   container.register(Services.LOGGER, { useValue: logger });
 
-  const tracer = tracing.start();
+  tracing.start();
+  const tracer = trace.getTracer('change-merger');
   container.register(Services.TRACER, { useValue: tracer });
 
   const metrics = new Metrics('change-merger');
