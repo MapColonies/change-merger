@@ -32,6 +32,6 @@ stages:
           - template: azure-pipelines/buildAndPush.yaml@devops
             parameters:
               dockerfilePaths:
-              - name: change-merger
-                path: '$(Build.SourcesDirectory)/Dockerfile'
+                - name: change-merger
+                  path: '$(Build.SourcesDirectory)/Dockerfile'
               appName: 'change-merger'
