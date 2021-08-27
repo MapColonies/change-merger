@@ -52,7 +52,7 @@
     "express": "^4.17.1",
     "html-entities": "^2.3.2",
     "fast-xml-parser": "^3.19.0",
-    "express-openapi-validator": "^4.12.14",
+    "express-openapi-validator": "^4.12.15",
     "http-status-codes": "^2.1.4",
     "js-yaml": "^3.14.1",
     "reflect-metadata": "^0.1.13",
