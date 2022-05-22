@@ -8,7 +8,7 @@ export const getSampleData = (): ChangeWithMetadata[] => [
     externalId: 'a',
     change: {
       type: 'osmchange',
-      create: ([
+      create: [
         { id: -2, type: 'node', version: 0, lon: 24, lat: 24, tags: { cat: 'bark' } },
         { id: -3, type: 'node', version: 0, lon: 25, lat: 25 },
         { id: -4, type: 'node', version: 0, lon: 26, lat: 26 },
@@ -22,7 +22,7 @@ export const getSampleData = (): ChangeWithMetadata[] => [
             { id: -4, type: 'node', version: 0, lon: 26, lat: 26 },
           ],
         },
-      ] as unknown) as BaseElement[],
+      ] as unknown as BaseElement[],
     },
   },
   {
@@ -30,8 +30,8 @@ export const getSampleData = (): ChangeWithMetadata[] => [
     externalId: 'b',
     change: {
       type: 'osmchange',
-      create: ([{ id: -2, type: 'node', version: 0, lon: 24, lat: 24, tags: { cat: 'bark' } }] as unknown) as BaseElement[],
-      modify: ([
+      create: [{ id: -2, type: 'node', version: 0, lon: 24, lat: 24, tags: { cat: 'bark' } }] as unknown as BaseElement[],
+      modify: [
         {
           id: 1,
           type: 'way',
@@ -42,7 +42,7 @@ export const getSampleData = (): ChangeWithMetadata[] => [
             { id: 4, type: 'node', version: 0, lon: 26, lat: 26 },
           ],
         },
-      ] as unknown) as BaseElement[],
+      ] as unknown as BaseElement[],
     },
   },
   {
@@ -50,7 +50,7 @@ export const getSampleData = (): ChangeWithMetadata[] => [
     externalId: 'c',
     change: {
       type: 'osmchange',
-      delete: ([
+      delete: [
         { id: 1, type: 'node', version: 0, lon: 24, lat: 24, tags: { cat: 'bark' } },
         { id: 6, type: 'node', version: 0, lon: 24, lat: 24, tags: { cat: 'bark' } },
         { id: 7, type: 'node', version: 0, lon: 25, lat: 25 },
@@ -65,7 +65,7 @@ export const getSampleData = (): ChangeWithMetadata[] => [
             { id: 8, type: 'node', version: 0, lon: 26, lat: 26 },
           ],
         },
-      ] as unknown) as BaseElement[],
+      ] as unknown as BaseElement[],
     },
   },
 ];

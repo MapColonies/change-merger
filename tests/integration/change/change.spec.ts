@@ -29,7 +29,7 @@ describe('change', function () {
 
   describe('Bad Path', function () {
     it('should fail if changesetId is not a number', async function () {
-      const requestBody = ({ changesetId: 'aa', changes: getSampleData() } as unknown) as MergeChangesRequestBody;
+      const requestBody = { changesetId: 'aa', changes: getSampleData() } as unknown as MergeChangesRequestBody;
 
       const response = await requestSender.postMergeChanges(requestBody);
 
@@ -40,7 +40,7 @@ describe('change', function () {
     it('should fail if action value is not part of the enum', async function () {
       const changes = getSampleData();
       changes[0].action = 'xd' as 'create';
-      const requestBody = ({ changesetId: 1, changes: changes } as unknown) as MergeChangesRequestBody;
+      const requestBody = { changesetId: 1, changes: changes } as unknown as MergeChangesRequestBody;
 
       const response = await requestSender.postMergeChanges(requestBody);
 
@@ -55,7 +55,7 @@ describe('change', function () {
       const changes = getSampleData();
       const { externalId, ...newChange } = changes[0];
       changes[0] = newChange as ChangeWithMetadata;
-      const requestBody = ({ changesetId: 1, changes: changes } as unknown) as MergeChangesRequestBody;
+      const requestBody = { changesetId: 1, changes: changes } as unknown as MergeChangesRequestBody;
 
       const response = await requestSender.postMergeChanges(requestBody);
 

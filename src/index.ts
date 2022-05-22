@@ -16,6 +16,7 @@ const app = getApp();
 
 const logger = container.resolve<Logger>(Services.LOGGER);
 const stubHealthcheck = async (): Promise<void> => Promise.resolve();
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const server = createTerminus(createServer(app), { healthChecks: { '/liveness': stubHealthcheck }, onSignal: container.resolve('onSignal') });
 
 server.listen(port, () => {
