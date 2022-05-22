@@ -11,6 +11,7 @@ import { getTraceContexHeaderMiddleware } from '@map-colonies/telemetry';
 import { Services } from './common/constants';
 import { IConfig } from './common/interfaces';
 import { changeRouterFactory } from './change/routes/changeRouter';
+
 @injectable()
 export class ServerBuilder {
   private readonly serverInstance = express();
