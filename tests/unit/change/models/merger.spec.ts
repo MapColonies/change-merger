@@ -49,8 +49,8 @@ describe('merger', function () {
           externalId: 'b',
           change: {
             type: 'osmchange',
-            create: ([{ id: -2, type: 'node', version: 0, lon: 24, lat: 24, tags: { cat: 'bark' } }] as unknown) as BaseElement[],
-            modify: ([
+            create: [{ id: -2, type: 'node', version: 0, lon: 24, lat: 24, tags: { cat: 'bark' } }] as unknown as BaseElement[],
+            modify: [
               {
                 id: 1,
                 type: 'way',
@@ -61,7 +61,7 @@ describe('merger', function () {
                   { id: 4, type: 'node', version: 0, lon: 26, lat: 26 },
                 ],
               },
-            ] as unknown) as BaseElement[],
+            ] as unknown as BaseElement[],
           },
         },
       ];
@@ -81,7 +81,7 @@ describe('merger', function () {
           externalId: 'c',
           change: {
             type: 'osmchange',
-            delete: ([{ id: -2, type: 'node', version: 0, lon: 24, lat: 24, tags: { cat: 'bark' } }] as unknown) as BaseElement[],
+            delete: [{ id: -2, type: 'node', version: 0, lon: 24, lat: 24, tags: { cat: 'bark' } }] as unknown as BaseElement[],
           },
         },
       ];

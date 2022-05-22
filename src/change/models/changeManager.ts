@@ -7,7 +7,7 @@ import { IdMapping, ChangeWithMetadata } from './types';
 
 @injectable()
 export class ChangeManager {
-  public constructor(@inject(Services.LOGGER) private readonly logger: Logger) { }
+  public constructor(@inject(Services.LOGGER) private readonly logger: Logger) {}
 
   public mergeChanges(changes: ChangeWithMetadata[], changesetId: number): [string, IdMapping[], string[]] {
     this.logger.info({ msg: 'started changes merging', amount: changes.length });
