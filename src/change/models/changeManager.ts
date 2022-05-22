@@ -10,7 +10,7 @@ export class ChangeManager {
   public constructor(@inject(Services.LOGGER) private readonly logger: Logger) {}
 
   public mergeChanges(changes: ChangeWithMetadata[], changesetId: number): [string, IdMapping[], string[]] {
-    this.logger.info({ msg: 'started changes merging', amount: changes.length });
+    this.logger.info({ msg: 'started changes merging', count: changes.length });
 
     const [change, idsToCreate, idsToDelete] = mergeChanges(changes, changesetId);
     return [changeToXml({ osmChange: change }), idsToCreate, idsToDelete];
