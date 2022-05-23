@@ -48,7 +48,7 @@
     "@opentelemetry/instrumentation-http": "^0.22.0",
     "@map-colonies/openapi-express-viewer": "^2.0.1",
     "compression": "^1.7.4",
-    "config": "^3.3.6",
+    "config": "^3.3.7",
     "express": "^4.17.1",
     "html-entities": "^2.3.2",
     "fast-xml-parser": "^3.20.3",
