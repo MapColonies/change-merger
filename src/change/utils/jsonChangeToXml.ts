@@ -1,18 +1,15 @@
-import { J2xOptions, j2xParser } from 'fast-xml-parser';
-import { encode } from 'html-entities';
+import { XMLBuilder, XmlBuilderOptionsOptional } from 'fast-xml-parser';
 import { OsmXmlChange } from '../models/types';
 
-const options: Partial<J2xOptions> = {
+const options: XmlBuilderOptionsOptional = {
   attributeNamePrefix: '',
   textNodeName: '#text',
   ignoreAttributes: false,
-  cdataTagName: '__cdata', //default is 'false'
-  cdataPositionChar: '\\c',
-  attrValueProcessor: (value) => encode(value),
+  cdataPropName: '__cdata', //default is 'false'
 };
 
-const parser = new j2xParser(options);
+const parser = new XMLBuilder(options);
 
 export const changeToXml = (change: { osmChange: OsmXmlChange }): string => {
-  return parser.parse(change) as string;
+  return parser.build(change) as string;
 };
