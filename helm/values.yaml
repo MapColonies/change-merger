@@ -9,13 +9,16 @@ initialDelaySeconds: 60
 environment: development
 replicaCount: 1
 
+annotations: {}
+podAnnotations: {}
+
 cloudProvider:
   flavor: openshift
   dockerRegistryUrl: 'my-registry.io'
 
 image:
   repository: change-merger
-  tag: 'latest'
+  # tag: 'latest'
 
 env:
   port: 8080
@@ -23,9 +26,12 @@ env:
   protocol: TCP
   logLevel: info
   requestPayloadLimit: 5mb
+  responseCompressionEnabled: true
+  logPrettyPrintEnabled: false
   tracing:
     enabled: false
     url: http://localhost:55681/v1/trace
+    ratio: 1
   metrics:
     enabled: false
     url: http://localhost:55681/v1/metrics

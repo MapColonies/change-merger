@@ -20,6 +20,13 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 
 {{/*
+Returns the tag of the chart.
+*/}}
+{{- define "change-merger.tag" -}}
+{{- default (printf "v%s" .Chart.AppVersion) .Values.image.tag }}
+{{- end }}
+
+{{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "change-merger.chart" -}}
