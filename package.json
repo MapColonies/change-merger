@@ -1,6 +1,6 @@
 {
   "name": "change-merger",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "This service merges multiple change files into one, and converts",
   "main": "./src/index.ts",
   "scripts": {
