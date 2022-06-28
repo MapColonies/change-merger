@@ -2,6 +2,7 @@
 {{- $chartName := include "change-merger.name" . -}}
 {{- $cloudProviderFlavor := include "change-merger.cloudProviderFlavor" . -}}
 {{- $cloudProviderDockerRegistryUrl := include "change-merger.cloudProviderDockerRegistryUrl" . -}}
+{{- $tag := include "change-merger.tag" . -}}
 {{- if .Values.enabled -}}
 apiVersion: apps/v1
 kind: Deployment
@@ -13,6 +14,10 @@ metadata:
     environment: {{ include "change-merger.environment" . }}
     release: {{ $releaseName }}
     {{- include "change-merger.labels" . | nindent 4 }}
+{{- with .Values.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -28,14 +33,18 @@ spec:
         release: {{ $releaseName }}
         run: {{ $releaseName }}-{{ $chartName }}
         {{- include "change-merger.selectorLabels" . | nindent 8 }}
+{{- with .Values.podAnnotations }}
+      annotations:
+{{ toYaml . | indent 8 }}
+{{- end }}
     spec:
       containers:
         - name: {{ $releaseName }}-{{ $chartName }}-deployment
           {{- with .Values.image }}
           {{- if ne $cloudProviderFlavor "minikube" }}
-          image: {{ .repository }}:{{ .tag }}
+          image: {{ .repository }}:{{ $tag }}
           {{- else }}
-          image: {{ $cloudProviderDockerRegistryUrl }}/{{ .repository }}:{{ .tag }}
+          image: {{ $cloudProviderDockerRegistryUrl }}/{{ .repository }}:{{ $tag }}
           {{- end }}
           {{- end }}
           env:
