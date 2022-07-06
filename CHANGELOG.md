@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.4](https://github.com/MapColonies/change-merger/compare/v1.3.3...v1.3.4) (2022-07-06)
+
+
+### Bug Fixes
+
+* parsing boolean values are no longer suppressed ([#86](https://github.com/MapColonies/change-merger/issues/86)) ([7bd5af9](https://github.com/MapColonies/change-merger/commit/7bd5af94277c8bb1380500b233fe23387e04f439))
+
 ### [1.3.3](https://github.com/MapColonies/change-merger/compare/v1.3.2...v1.3.3) (2022-06-15)
 
 ### [1.3.2](https://github.com/MapColonies/change-merger/compare/v1.3.1...v1.3.2) (2022-06-15)
