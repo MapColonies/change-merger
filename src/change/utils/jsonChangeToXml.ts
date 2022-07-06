@@ -6,7 +6,7 @@ const options: XmlBuilderOptionsOptional = {
   textNodeName: '#text',
   ignoreAttributes: false,
   cdataPropName: '__cdata', //default is 'false',
-  suppressBooleanAttributes: false
+  suppressBooleanAttributes: false,
 };
 
 const parser = new XMLBuilder(options);

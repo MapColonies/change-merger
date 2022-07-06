@@ -36,7 +36,7 @@ export const getSampleData = (): ChangeWithMetadata[] => [
           id: 1,
           type: 'way',
           version: 0,
-          tags: { verified: "true", avi: "היי" },
+          tags: { verified: 'true', avi: 'היי' },
           nodes: [
             { id: -2, type: 'node', version: 0, lon: 24, lat: 24, tags: { cat: 'bark' } },
             { id: 3, type: 'node', version: 0, lon: 25, lat: 25 },
