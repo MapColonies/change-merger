@@ -19,6 +19,7 @@ cloudProvider:
 image:
   repository: change-merger
   # tag: 'latest'
+  pullPolicy: Always
 
 env:
   port: 8080
@@ -27,7 +28,6 @@ env:
   logLevel: info
   requestPayloadLimit: 5mb
   responseCompressionEnabled: true
-  logPrettyPrintEnabled: false
   tracing:
     enabled: false
     url: http://localhost:55681/v1/trace
@@ -48,4 +48,6 @@ resources:
 
 route:
   enabled: true
+  tls:
+    termination: edge
   path: /

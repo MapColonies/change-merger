@@ -42,11 +42,12 @@ spec:
         - name: {{ $releaseName }}-{{ $chartName }}-deployment
           {{- with .Values.image }}
           {{- if ne $cloudProviderFlavor "minikube" }}
-          image: {{ .repository }}:{{ $tag }}
-          {{- else }}
           image: {{ $cloudProviderDockerRegistryUrl }}/{{ .repository }}:{{ $tag }}
+          {{- else }}
+          image: {{ .repository }}:{{ $tag }}
           {{- end }}
           {{- end }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: SERVER_PORT
               value: {{ .Values.env.targetPort | quote }}
