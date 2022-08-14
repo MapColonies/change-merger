@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.5](https://github.com/MapColonies/change-merger/compare/v1.3.4...v1.3.5) (2022-08-14)
+
+
+### Bug Fixes
+
+* helm changes ([#87](https://github.com/MapColonies/change-merger/issues/87)) ([b230e3e](https://github.com/MapColonies/change-merger/commit/b230e3e8281d3171d4d0134ef51c7cbd8d7c3212))
+
 ### [1.3.4](https://github.com/MapColonies/change-merger/compare/v1.3.3...v1.3.4) (2022-07-06)
 
 

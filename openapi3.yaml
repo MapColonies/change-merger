@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: change-merger
   description: Simple service for merging multiple OSM changes into one
-  version: 1.3.4
+  version: 1.3.5
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
