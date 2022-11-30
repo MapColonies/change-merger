@@ -9,6 +9,7 @@ metadata:
     icon: article
   annotations:
     github.com/project-slug: MapColonies/change-merger
+  tags: Node.js
 spec:
   type: service
   lifecycle: production
