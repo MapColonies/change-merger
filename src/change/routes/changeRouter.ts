@@ -11,4 +11,6 @@ const changeRouterFactory: FactoryFunction<Router> = (dependencyContainer) => {
   return router;
 };
 
+export const CHANGE_ROUTER_SYMBOL = Symbol('changeRouterFactory');
+
 export { changeRouterFactory };

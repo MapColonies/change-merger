@@ -1,19 +1,24 @@
+import jsLogger from '@map-colonies/js-logger';
+import { trace } from '@opentelemetry/api';
 import httpStatusCodes from 'http-status-codes';
-import { container } from 'tsyringe';
 import { MergeChangesRequestBody } from '../../../src/change/controllers/changeController';
 import { ChangeWithMetadata } from '../../../src/change/models/types';
 import { getSampleData } from '../../sampleData';
-
-import { registerTestValues } from '../testContainerConfig';
-import * as requestSender from './helpers/requestSender';
+import { getApp } from '../../../src/app';
+import { Services } from '../../../src/common/constants';
+import { ChangeRequestSender } from './helpers/requestSender';
 
 describe('change', function () {
+  let requestSender: ChangeRequestSender;
   beforeEach(function () {
-    registerTestValues();
-    requestSender.init();
-  });
-  afterEach(function () {
-    container.clearInstances();
+    const app = getApp({
+      override: [
+        { token: Services.LOGGER, provider: { useValue: jsLogger({ enabled: false }) } },
+        { token: Services.TRACER, provider: { useValue: trace.getTracer('testTracer') } },
+      ],
+      useChild: true,
+    });
+    requestSender = new ChangeRequestSender(app);
   });
 
   describe('Happy Path', function () {
