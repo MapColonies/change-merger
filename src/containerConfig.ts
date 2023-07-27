@@ -1,8 +1,7 @@
 import config from 'config';
 import { Metrics, getOtelMixin } from '@map-colonies/telemetry';
-import { metrics } from '@opentelemetry/api-metrics';
+import { trace, metrics as OtelMetrics } from '@opentelemetry/api';
 import jsLogger, { LoggerOptions } from '@map-colonies/js-logger';
-import { trace } from '@opentelemetry/api';
 import { tracing } from './common/tracing';
 import { SERVICES, SERVICE_NAME } from './common/constants';
 import { DependencyContainer } from 'tsyringe/dist/typings/types';
@@ -26,7 +25,7 @@ export const registerExternalValues = (options?: RegisterOptions): DependencyCon
     { token: SERVICES.CONFIG, provider: { useValue: config } },
     { token: SERVICES.LOGGER, provider: { useValue: logger } },
     { token: SERVICES.TRACER, provider: { useValue: tracer } },
-    { token: SERVICES.METER, provider: { useValue: metrics.getMeter('change-merger') } },
+    { token: SERVICES.METER, provider: { useValue: OtelMetrics.getMeterProvider().getMeter(SERVICE_NAME) } },
     { token: CHANGE_ROUTER_SYMBOL, provider: { useFactory: changeRouterFactory } },
     {
       token: 'onSignal',
