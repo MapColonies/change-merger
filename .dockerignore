@@ -12,7 +12,6 @@ README.md
 tsconfig.lint.json
 .nvmrc
 .git*
-commitlint.config.json
 dist
 build
 reports
