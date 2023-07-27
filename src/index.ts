@@ -8,10 +8,9 @@ import { Logger } from '@map-colonies/js-logger';
 import { createTerminus } from '@godaddy/terminus';
 import { getApp } from './app';
 import { DEFAULT_SERVER_PORT, SERVICES } from './common/constants';
-import { IServerConfig } from './common/interfaces';
 
-const serverConfig = config.get<IServerConfig>('server');
-const port: number = parseInt(serverConfig.port) || DEFAULT_SERVER_PORT;
+const port: number = config.get<number>('server.port') || DEFAULT_SERVER_PORT;
+
 const app = getApp();
 
 const logger = container.resolve<Logger>(SERVICES.LOGGER);
