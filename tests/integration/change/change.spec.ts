@@ -8,7 +8,7 @@ import { registerTestValues } from '../testContainerConfig';
 import * as requestSender from './helpers/requestSender';
 
 describe('change', function () {
-  beforeAll(function () {
+  beforeEach(function () {
     registerTestValues();
     requestSender.init();
   });
