@@ -28,6 +28,7 @@ describe('change', function () {
       const response = await requestSender.postMergeChanges(requestBody);
 
       expect(response.status).toBe(httpStatusCodes.OK);
+      // expect(response).toSatisfyApiSpec();
       expect(response.body).toMatchSnapshot();
     });
   });
