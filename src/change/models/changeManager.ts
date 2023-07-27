@@ -1,13 +1,13 @@
 import { Logger } from '@map-colonies/js-logger';
 import { inject, injectable } from 'tsyringe';
-import { Services } from '../../common/constants';
+import { SERVICES } from '../../common/constants';
 import { changeToXml } from '../utils/jsonChangeToXml';
 import { mergeChanges } from './merger';
 import { IdMapping, ChangeWithMetadata } from './types';
 
 @injectable()
 export class ChangeManager {
-  public constructor(@inject(Services.LOGGER) private readonly logger: Logger) {}
+  public constructor(@inject(SERVICES.LOGGER) private readonly logger: Logger) {}
 
   public mergeChanges(changes: ChangeWithMetadata[], changesetId: number): [string, IdMapping[], string[]] {
     this.logger.info({ msg: 'started changes merging', count: changes.length });

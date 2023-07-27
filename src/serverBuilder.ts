@@ -8,7 +8,7 @@ import { inject, injectable } from 'tsyringe';
 import { Logger } from '@map-colonies/js-logger';
 import httpLogger from '@map-colonies/express-access-log-middleware';
 import { getTraceContexHeaderMiddleware, defaultMetricsMiddleware } from '@map-colonies/telemetry';
-import { Services } from './common/constants';
+import { SERVICES } from './common/constants';
 import { IConfig } from './common/interfaces';
 import { CHANGE_ROUTER_SYMBOL } from './change/routes/changeRouter';
 
@@ -17,8 +17,8 @@ export class ServerBuilder {
   private readonly serverInstance: express.Application;
 
   public constructor(
-    @inject(Services.CONFIG) private readonly config: IConfig,
-    @inject(Services.LOGGER) private readonly logger: Logger,
+    @inject(SERVICES.CONFIG) private readonly config: IConfig,
+    @inject(SERVICES.LOGGER) private readonly logger: Logger,
     @inject(CHANGE_ROUTER_SYMBOL) private readonly changeRouter: Router
   ) {
     this.serverInstance = express();

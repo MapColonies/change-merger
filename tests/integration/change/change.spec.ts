@@ -5,7 +5,7 @@ import { MergeChangesRequestBody } from '../../../src/change/controllers/changeC
 import { ChangeWithMetadata } from '../../../src/change/models/types';
 import { getSampleData } from '../../sampleData';
 import { getApp } from '../../../src/app';
-import { Services } from '../../../src/common/constants';
+import { SERVICES } from '../../../src/common/constants';
 import { ChangeRequestSender } from './helpers/requestSender';
 
 describe('change', function () {
@@ -13,8 +13,8 @@ describe('change', function () {
   beforeEach(function () {
     const app = getApp({
       override: [
-        { token: Services.LOGGER, provider: { useValue: jsLogger({ enabled: false }) } },
-        { token: Services.TRACER, provider: { useValue: trace.getTracer('testTracer') } },
+        { token: SERVICES.LOGGER, provider: { useValue: jsLogger({ enabled: false }) } },
+        { token: SERVICES.TRACER, provider: { useValue: trace.getTracer('testTracer') } },
       ],
       useChild: true,
     });
