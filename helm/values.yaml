@@ -17,6 +17,9 @@ cloudProvider:
   imagePullSecretName: 'my-registry-secret'
   dockerRegistryUrl: 'my-registry.io'
 
+caSecretName: ''
+caKey: 'ca.crt'
+
 image:
   repository: change-merger
   # tag: 'latest'
