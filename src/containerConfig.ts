@@ -2,9 +2,9 @@ import config from 'config';
 import { Metrics, getOtelMixin } from '@map-colonies/telemetry';
 import { trace, metrics as OtelMetrics } from '@opentelemetry/api';
 import jsLogger, { LoggerOptions } from '@map-colonies/js-logger';
+import { DependencyContainer } from 'tsyringe/dist/typings/types';
 import { tracing } from './common/tracing';
 import { SERVICES, SERVICE_NAME } from './common/constants';
-import { DependencyContainer } from 'tsyringe/dist/typings/types';
 import { InjectionObject, registerDependencies } from './common/dependencyRegistration';
 import { CHANGE_ROUTER_SYMBOL, changeRouterFactory } from './change/routes/changeRouter';
 
