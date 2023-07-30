@@ -40,7 +40,7 @@ describe('change', function () {
       const response = await requestSender.postMergeChanges(requestBody);
 
       expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
-      expect(response.body).toHaveProperty('message', 'request.body.changesetId should be number');
+      expect(response.body).toHaveProperty('message', 'request/body/changesetId must be number');
     });
 
     it('should fail if action value is not part of the enum', async function () {
@@ -53,7 +53,7 @@ describe('change', function () {
       expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
       expect(response.body).toHaveProperty(
         'message',
-        'request.body.changes[0].action should be equal to one of the allowed values: create, modify, delete'
+        'request/body/changes/0/action must be equal to one of the allowed values: create, modify, delete'
       );
     });
 
@@ -66,7 +66,7 @@ describe('change', function () {
       const response = await requestSender.postMergeChanges(requestBody);
 
       expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
-      expect(response.body).toHaveProperty('message', "request.body.changes[0] should have required property 'externalId'");
+      expect(response.body).toHaveProperty('message', "request/body/changes/0 must have required property 'externalId'");
     });
   });
 });
