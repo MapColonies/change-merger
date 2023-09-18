@@ -1,14 +1,14 @@
 import config, { IConfig } from 'config';
+import client from 'prom-client';
+import { instancePerContainerCachingFactory } from 'tsyringe';
 import { Metrics, getOtelMixin } from '@map-colonies/telemetry';
 import { trace, metrics as OtelMetrics } from '@opentelemetry/api';
 import jsLogger, { LoggerOptions } from '@map-colonies/js-logger';
-import client from 'prom-client';
 import { DependencyContainer } from 'tsyringe/dist/typings/types';
 import { tracing } from './common/tracing';
 import { SERVICES, SERVICE_NAME, METRICS_REGISTRY } from './common/constants';
 import { InjectionObject, registerDependencies } from './common/dependencyRegistration';
 import { CHANGE_ROUTER_SYMBOL, changeRouterFactory } from './change/routes/changeRouter';
-import { instancePerContainerCachingFactory } from 'tsyringe';
 
 export interface RegisterOptions {
   override?: InjectionObject<unknown>[];
