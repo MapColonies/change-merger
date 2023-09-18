@@ -1,11 +1,12 @@
 import jsLogger from '@map-colonies/js-logger';
 import { trace } from '@opentelemetry/api';
+import client from 'prom-client';
 import httpStatusCodes from 'http-status-codes';
 import { MergeChangesRequestBody } from '../../../src/change/controllers/changeController';
 import { ChangeWithMetadata } from '../../../src/change/models/types';
 import { getSampleData } from '../../sampleData';
 import { getApp } from '../../../src/app';
-import { SERVICES } from '../../../src/common/constants';
+import { METRICS_REGISTRY, SERVICES } from '../../../src/common/constants';
 import { ChangeRequestSender } from './helpers/requestSender';
 
 describe('change', function () {
@@ -15,6 +16,7 @@ describe('change', function () {
       override: [
         { token: SERVICES.LOGGER, provider: { useValue: jsLogger({ enabled: false }) } },
         { token: SERVICES.TRACER, provider: { useValue: trace.getTracer('testTracer') } },
+        { token: METRICS_REGISTRY, provider: { useValue: new client.Registry() } },
       ],
       useChild: true,
     });
@@ -28,7 +30,6 @@ describe('change', function () {
       const response = await requestSender.postMergeChanges(requestBody);
 
       expect(response.status).toBe(httpStatusCodes.OK);
-      // expect(response).toSatisfyApiSpec();
       expect(response.body).toMatchSnapshot();
     });
   });

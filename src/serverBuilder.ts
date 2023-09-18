@@ -7,10 +7,11 @@ import { middleware as OpenApiMiddleware } from 'express-openapi-validator';
 import { inject, injectable } from 'tsyringe';
 import { Logger } from '@map-colonies/js-logger';
 import httpLogger from '@map-colonies/express-access-log-middleware';
-import { getTraceContexHeaderMiddleware, defaultMetricsMiddleware } from '@map-colonies/telemetry';
-import { SERVICES } from './common/constants';
+import { getTraceContexHeaderMiddleware, defaultMetricsMiddleware, metricsMiddleware } from '@map-colonies/telemetry';
+import { SERVICES, METRICS_REGISTRY } from './common/constants';
 import { IConfig } from './common/interfaces';
 import { CHANGE_ROUTER_SYMBOL } from './change/routes/changeRouter';
+import { Registry } from 'prom-client';
 
 @injectable()
 export class ServerBuilder {
@@ -19,7 +20,8 @@ export class ServerBuilder {
   public constructor(
     @inject(SERVICES.CONFIG) private readonly config: IConfig,
     @inject(SERVICES.LOGGER) private readonly logger: Logger,
-    @inject(CHANGE_ROUTER_SYMBOL) private readonly changeRouter: Router
+    @inject(CHANGE_ROUTER_SYMBOL) private readonly changeRouter: Router,
+    @inject(METRICS_REGISTRY) private readonly metricsRegistry?: Registry
   ) {
     this.serverInstance = express();
   }
@@ -47,7 +49,9 @@ export class ServerBuilder {
   }
 
   private registerPreRoutesMiddleware(): void {
-    this.serverInstance.use('/metrics', defaultMetricsMiddleware());
+    if (this.metricsRegistry) {
+      this.serverInstance.use('/metrics', metricsMiddleware(this.metricsRegistry));
+    }
 
     if (this.config.get<boolean>('server.response.compression.enabled')) {
       this.serverInstance.use(compression(this.config.get<compression.CompressionFilter>('server.response.compression.options')));
