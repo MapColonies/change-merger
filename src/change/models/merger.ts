@@ -41,7 +41,7 @@ const handleChangeArray = (
 const handleChangeObj = (changeObj: ChangeWithMetadata, idGenerator: IdGenerator, change: OsmXmlChange, changesetId: number): number => {
   const tempMapping = new Map<number, number>();
 
-  const actions: typeof changeObj.action[] = ['create', 'modify', 'delete'];
+  const actions: (typeof changeObj.action)[] = ['create', 'modify', 'delete'];
 
   actions.forEach((action) => {
     const elementArr = changeObj.change[action];

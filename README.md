@@ -1,11 +1,4 @@
 # change-merger
-----------------------------------
-
-![badge-alerts-lgtm](https://img.shields.io/lgtm/alerts/github/MapColonies/change-merger?style=for-the-badge)
-
-![grade-badge-lgtm](https://img.shields.io/lgtm/grade/javascript/github/MapColonies/change-merger?style=for-the-badge)
-
-![snyk](https://img.shields.io/snyk/vulnerabilities/github/MapColonies/change-merger?style=for-the-badge)
 
 ----------------------------------
 
@@ -21,6 +14,11 @@ Install deps with npm
 
 ```bash
 npm install
+```
+
+### Install Git Hooks
+```bash
+npx husky install
 ```
 
 ## Run Locally

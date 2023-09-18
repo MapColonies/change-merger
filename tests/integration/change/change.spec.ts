@@ -1,19 +1,26 @@
+import jsLogger from '@map-colonies/js-logger';
+import { trace } from '@opentelemetry/api';
+import client from 'prom-client';
 import httpStatusCodes from 'http-status-codes';
-import { container } from 'tsyringe';
 import { MergeChangesRequestBody } from '../../../src/change/controllers/changeController';
 import { ChangeWithMetadata } from '../../../src/change/models/types';
 import { getSampleData } from '../../sampleData';
-
-import { registerTestValues } from '../testContainerConfig';
-import * as requestSender from './helpers/requestSender';
+import { getApp } from '../../../src/app';
+import { METRICS_REGISTRY, SERVICES } from '../../../src/common/constants';
+import { ChangeRequestSender } from './helpers/requestSender';
 
 describe('change', function () {
-  beforeAll(function () {
-    registerTestValues();
-    requestSender.init();
-  });
-  afterEach(function () {
-    container.clearInstances();
+  let requestSender: ChangeRequestSender;
+  beforeEach(function () {
+    const app = getApp({
+      override: [
+        { token: SERVICES.LOGGER, provider: { useValue: jsLogger({ enabled: false }) } },
+        { token: SERVICES.TRACER, provider: { useValue: trace.getTracer('testTracer') } },
+        { token: METRICS_REGISTRY, provider: { useValue: new client.Registry() } },
+      ],
+      useChild: true,
+    });
+    requestSender = new ChangeRequestSender(app);
   });
 
   describe('Happy Path', function () {
@@ -34,7 +41,7 @@ describe('change', function () {
       const response = await requestSender.postMergeChanges(requestBody);
 
       expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
-      expect(response.body).toHaveProperty('message', 'request.body.changesetId should be number');
+      expect(response.body).toHaveProperty('message', 'request/body/changesetId must be number');
     });
 
     it('should fail if action value is not part of the enum', async function () {
@@ -47,7 +54,7 @@ describe('change', function () {
       expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
       expect(response.body).toHaveProperty(
         'message',
-        'request.body.changes[0].action should be equal to one of the allowed values: create, modify, delete'
+        'request/body/changes/0/action must be equal to one of the allowed values: create, modify, delete'
       );
     });
 
@@ -60,7 +67,7 @@ describe('change', function () {
       const response = await requestSender.postMergeChanges(requestBody);
 
       expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
-      expect(response.body).toHaveProperty('message', "request.body.changes[0] should have required property 'externalId'");
+      expect(response.body).toHaveProperty('message', "request/body/changes/0 must have required property 'externalId'");
     });
   });
 });

@@ -4,12 +4,12 @@ metadata:
   name: change-merger
   description: Merges multiple OSM changes into one big OSM change
   links:
-  - url: https://mapcolonies.atlassian.net/wiki/spaces/MAPConflicResolution/pages/1353613504/Ingestion#Details-about-our-services
-    title: Confluence 
-    icon: article
+    - url: https://mapcolonies.atlassian.net/wiki/spaces/MAPConflicResolution/pages/1353613504/Ingestion#Details-about-our-services
+      title: Confluence
+      icon: article
   annotations:
     github.com/project-slug: MapColonies/change-merger
-  tags: 
+  tags:
     - nodejs
     - typescript
     - expressjs
