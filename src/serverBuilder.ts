@@ -1,4 +1,5 @@
 import express, { Router } from 'express';
+import { Registry } from 'prom-client';
 import bodyParser from 'body-parser';
 import compression from 'compression';
 import { getErrorHandlerMiddleware } from '@map-colonies/error-express-handler';
@@ -11,7 +12,6 @@ import { getTraceContexHeaderMiddleware, metricsMiddleware } from '@map-colonies
 import { SERVICES, METRICS_REGISTRY } from './common/constants';
 import { IConfig } from './common/interfaces';
 import { CHANGE_ROUTER_SYMBOL } from './change/routes/changeRouter';
-import { Registry } from 'prom-client';
 
 @injectable()
 export class ServerBuilder {
