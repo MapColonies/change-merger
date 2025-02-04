@@ -2,24 +2,22 @@
 {{- $chartName := include "change-merger.name" . -}}
 {{- $cloudProviderFlavor := include "change-merger.cloudProviderFlavor" . -}}
 {{- $cloudProviderDockerRegistryUrl := include "change-merger.cloudProviderDockerRegistryUrl" . -}}
-{{- $tag := include "change-merger.tag" . -}}
+{{- $cloudProviderImagePullSecretName := include "change-merger.cloudProviderImagePullSecretName" . -}}
+{{- $imageTag := include "change-merger.tag" . -}}
 {{- if .Values.enabled -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ $releaseName }}-{{ $chartName }}
+  name: {{ printf "%s-deployment" (include "change-merger.fullname" .) }}
   labels:
     app: {{ $chartName }}
     component: {{ $chartName }}
     environment: {{ include "change-merger.environment" . }}
     release: {{ $releaseName }}
     {{- include "change-merger.labels" . | nindent 4 }}
-{{- with .Values.annotations }}
-  annotations:
-{{ toYaml . | indent 4 }}
-{{- end }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   selector:
     matchLabels:
       app: {{ $chartName }}
@@ -33,38 +31,95 @@ spec:
         release: {{ $releaseName }}
         run: {{ $releaseName }}-{{ $chartName }}
         {{- include "change-merger.selectorLabels" . | nindent 8 }}
-{{- with .Values.podAnnotations }}
       annotations:
-{{ toYaml . | indent 8 }}
-{{- end }}
+      {{- if .Values.resetOnConfigChange }}
+        checksum/configmap: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+      {{- end }}
+      {{- if .Values.podAnnotations }}
+      {{- toYaml .Values.podAnnotations | nindent 8 }}
+      {{- end }}
     spec:
+    {{- if $cloudProviderImagePullSecretName }}
+      imagePullSecrets:
+        - name: {{ $cloudProviderImagePullSecretName | quote }}
+    {{- end }}
       containers:
         - name: {{ $releaseName }}-{{ $chartName }}-deployment
           {{- with .Values.image }}
-          {{- if ne $cloudProviderFlavor "minikube" }}
-          image: {{ $cloudProviderDockerRegistryUrl }}/{{ .repository }}:{{ $tag }}
-          {{- else }}
-          image: {{ .repository }}:{{ $tag }}
+          image: {{ $cloudProviderDockerRegistryUrl }}{{ .repository }}:{{ $imageTag }}
+          imagePullPolicy: {{ .pullPolicy | default "IfNotPresent" }}
+          {{- end }}
+          {{- if .Values.command }}
+          command:
+          {{- toYaml .Values.command | nindent 12 }}
+          {{- if .Values.args }}
+          args:
+          {{- toYaml .Values.args | nindent 12 }}
           {{- end }}
           {{- end }}
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+            {{- if .Values.caSecretName }}
+            - mountPath: {{ printf "%s/%s" .Values.caPath .Values.caKey | quote }}
+              name: root-ca
+              subPath: {{ quote .Values.caKey }}
+            {{- end }}
+            {{- if .Values.extraVolumeMounts -}}
+              {{ toYaml .Values.extraVolumeMounts | nindent 12 }}
+            {{- end }}
           env:
             - name: SERVER_PORT
               value: {{ .Values.env.targetPort | quote }}
+            {{- if .Values.caSecretName }}
+            - name: REQUESTS_CA_BUNDLE
+              value: {{ printf "%s/%s" .Values.caPath .Values.caKey | quote }}
+            - name: NODE_EXTRA_CA_CERTS
+              value: {{ printf "[%s/%s]" .Values.caPath .Values.caKey | quote }}
+            {{- end }}
+            {{- if .Values.extraEnvVars }}
+            {{- toYaml .Values.extraEnvVars | nindent 12 }}
+            {{- end }}
           envFrom:
             - configMapRef:
-                name: {{ $releaseName }}-{{ $chartName }}-configmap
+                name: {{ printf "%s-configmap" (include "change-merger.fullname" .) }}
           ports:
             - name: http
               containerPort: {{ .Values.env.targetPort }}
               protocol: {{ .Values.env.protocol }}
+          {{- if .Values.livenessProbe.enabled }}
           livenessProbe:
-            initialDelaySeconds: {{ .Values.initialDelaySeconds }}
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
             httpGet:
-              path: /liveness
-              port: http
+              path: {{ .Values.livenessProbe.path }}
+              port: {{ .Values.env.targetPort }}
+          {{- end }}
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+            httpGet:
+              path: {{ .Values.readinessProbe.path }}
+              port: {{ .Values.env.targetPort }}
+          {{- end }}
           {{- if .Values.resources.enabled }}
           resources:
             {{- toYaml .Values.resources.value | nindent 12 }}
           {{- end }}
+        {{- if .Values.sidecars }}
+        {{ tpl (toYaml .Values.sidecars) . | nindent 8 }}
+        {{- end }}
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: 'nginx-extra-configmap'
+        {{- if .Values.caSecretName }}
+        - name: root-ca
+          secret:
+            secretName: {{ .Values.caSecretName }}
+        {{- end }}
+        {{- if .Values.extraVolumes -}}
+          {{ tpl (toYaml .Values.extraVolumes) . | nindent 8 }}
+        {{- end }}
 {{- end -}}

@@ -23,13 +23,13 @@ describe('creators', function () {
     it('should create an xml node based on the given osmNode', () => {
       const node: OsmNode = {
         type: 'node',
-        id: faker.datatype.number({ min: 1 }),
-        lat: faker.datatype.number({ min: -90, max: 90, precision: 2 }),
-        lon: faker.datatype.number({ min: -180, max: 180, precision: 2 }),
-        version: faker.datatype.number({ min: 1, max: 100 }),
+        id: faker.number.int({ min: 1 }),
+        lat: faker.number.float({ min: -90, max: 90, fractionDigits: 2 }),
+        lon: faker.number.float({ min: -180, max: 180, fractionDigits: 2 }),
+        version: faker.number.int({ min: 1, max: 100 }),
         tags: { a: '1' },
       };
-      const changesetId = faker.datatype.number({ min: 1 });
+      const changesetId = faker.number.int({ min: 1 });
 
       const newNode = createOsmXmlNode(node, changesetId);
 
@@ -41,8 +41,8 @@ describe('creators', function () {
     it('should create an xmlWay based on the old way, and subtitude the ids where needed', function () {
       const way: OsmWay = {
         type: 'way',
-        id: faker.datatype.number({ min: 1 }),
-        version: faker.datatype.number({ min: 1, max: 100 }),
+        id: faker.number.int({ min: 1 }),
+        version: faker.number.int({ min: 1, max: 100 }),
         tags: { a: '1' },
         nodes: [
           { id: 1, lon: 1, lat: 1, type: 'node' },
@@ -50,7 +50,7 @@ describe('creators', function () {
           { id: 2, lon: 1, lat: 1, type: 'node' },
         ],
       };
-      const changesetId = faker.datatype.number({ min: 1 });
+      const changesetId = faker.number.int({ min: 1 });
       const mapping = new Map([[-1, -5]]);
 
       const newWay = createOsmXmlWay(way, mapping, changesetId);

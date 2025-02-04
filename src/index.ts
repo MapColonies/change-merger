@@ -1,24 +1,40 @@
-// this import must be called before the first import of tsyring
+// this import must be called before the first import of tsyringe
 import 'reflect-metadata';
 import './common/tracing';
 import { createServer } from 'http';
-import { container } from 'tsyringe';
-import { get } from 'config';
 import { Logger } from '@map-colonies/js-logger';
 import { createTerminus } from '@godaddy/terminus';
+import { DependencyContainer } from 'tsyringe';
 import { getApp } from './app';
-import { DEFAULT_SERVER_PORT, Services } from './common/constants';
-import { IServerConfig } from './common/interfaces';
+import { HEALTHCHECK, ON_SIGNAL, SERVICES } from './common/constants';
+import { ConfigType } from './common/config';
 
-const serverConfig = get<IServerConfig>('server');
-const port: number = parseInt(serverConfig.port) || DEFAULT_SERVER_PORT;
-const app = getApp();
+let depContainer: DependencyContainer | undefined;
 
-const logger = container.resolve<Logger>(Services.LOGGER);
-const stubHealthcheck = async (): Promise<void> => Promise.resolve();
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const server = createTerminus(createServer(app), { healthChecks: { '/liveness': stubHealthcheck }, onSignal: container.resolve('onSignal') });
+void getApp()
+  .then(([app, depContainer]) => {
+    const logger = depContainer.resolve<Logger>(SERVICES.LOGGER);
+    const config = depContainer.resolve<ConfigType>(SERVICES.CONFIG);
+    const port = config.get('server.port');
 
-server.listen(port, () => {
-  logger.info(`app started on port ${port}`);
-});
+    const server = createTerminus(createServer(app), {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      healthChecks: { '/liveness': depContainer.resolve(HEALTHCHECK) },
+      onSignal: depContainer.resolve(ON_SIGNAL),
+    });
+
+    server.listen(port, () => {
+      logger.info(`app started on port ${port}`);
+    });
+  })
+  .catch(async (error: Error) => {
+    console.error('😢 - failed initializing the server');
+    console.error(error);
+
+    if (depContainer?.isRegistered(ON_SIGNAL) == true) {
+      const shutDown: () => Promise<void> = depContainer.resolve(ON_SIGNAL);
+      await shutDown();
+    }
+
+    process.exit(1);
+  });

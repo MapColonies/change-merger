@@ -1,17 +1,14 @@
 import * as supertest from 'supertest';
 import { Application } from 'express';
-
-import { container } from 'tsyringe';
-import { ServerBuilder } from '../../../../src/serverBuilder';
 import { MergeChangesRequestBody } from '../../../../src/change/controllers/changeController';
+import { OsmXmlChange } from '../../../../src/change/models/change';
+import { convertToXml } from '../../../../src/change/utils/jsonToXml';
 
-let app: Application | null = null;
-
-export function init(): void {
-  const builder = container.resolve<ServerBuilder>(ServerBuilder);
-  app = builder.build();
+export async function postMergeChanges(app: Application, body: MergeChangesRequestBody): Promise<supertest.Response> {
+  return supertest.agent(app).post('/change/merge').set('Content-Type', 'application/json').send(body);
 }
 
-export async function postMergeChanges(body: MergeChangesRequestBody): Promise<supertest.Response> {
-  return supertest.agent(app).post('/change/merge').set('Content-Type', 'application/json').send(body);
+export async function postInterpretChange(app: Application, body: { osmChange: OsmXmlChange }): Promise<supertest.Response> {
+  const xml = convertToXml(body);
+  return supertest.agent(app).post('/change/interpret').set('Content-Type', 'application/xml').send(xml);
 }

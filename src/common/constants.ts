@@ -1,13 +1,22 @@
+import { readPackageJsonSync } from '@map-colonies/read-pkg';
+
+export const SERVICE_NAME = readPackageJsonSync().name ?? 'unknown_service';
 export const DEFAULT_SERVER_PORT = 80;
 
-export const SERVICE_NAME = 'change-merger';
-
 export const IGNORED_OUTGOING_TRACE_ROUTES = [/^.*\/v1\/metrics.*$/];
-export const IGNORED_INCOMING_TRACE_ROUTES = [/^.*\/docs.*$/, /^.*\/metrics.*/];
+export const IGNORED_INCOMING_TRACE_ROUTES = [/^.*\/docs.*$/];
 
-export enum Services {
-  LOGGER = 'ILogger',
-  CONFIG = 'IConfig',
-  TRACER = 'TRACER',
-  METER = 'METER',
-}
+/* eslint-disable @typescript-eslint/naming-convention */
+export const SERVICES = {
+  LOGGER: Symbol('Logger'),
+  CONFIG: Symbol('Config'),
+  TRACER: Symbol('Tracer'),
+  METRICS: Symbol('Metrics'),
+  CLEANUP_REGISTRY: Symbol('CleanupRegistry'),
+} satisfies Record<string, symbol>;
+/* eslint-enable @typescript-eslint/naming-convention */
+
+export const stubHealthCheck = async (): Promise<void> => Promise.resolve();
+
+export const HEALTHCHECK = Symbol('Healthcheck');
+export const ON_SIGNAL = Symbol('OnSignal');

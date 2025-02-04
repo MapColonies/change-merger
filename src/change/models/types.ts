@@ -1,49 +1,20 @@
-import { OsmChange } from '@map-colonies/node-osm-elements';
-
-interface IdMapping {
+export interface IdMapping {
   externalId: string;
   tempOsmId: number;
 }
 
-interface OsmXmlTag {
-  k: string;
-  v: string;
+export interface MergeResult {
+  change: string;
+  created: IdMapping[];
+  deleted: string[];
 }
 
-interface ChangeWithMetadata {
+export interface InterpretedMapping {
   externalId: string;
-  change: OsmChange;
-  tempOsmId?: number;
-  action: 'create' | 'modify' | 'delete';
+  osmId: number;
 }
 
-interface OsmXmlBase {
-  id: number;
-  version: number;
-  changeset: number;
-  tag: OsmXmlTag[];
+export interface InterpretResult {
+  created: InterpretedMapping[];
+  deleted: InterpretedMapping[];
 }
-
-interface OsmXmlNode extends OsmXmlBase {
-  lon: number;
-  lat: number;
-}
-
-interface OsmXmlWay extends OsmXmlBase {
-  nd: { ref: number }[];
-}
-
-interface ChangeActionObj {
-  node: OsmXmlNode[];
-  way: OsmXmlWay[];
-}
-
-interface OsmXmlChange {
-  version: '0.6';
-  generator: string;
-  create: ChangeActionObj;
-  modify: ChangeActionObj;
-  delete: ChangeActionObj;
-}
-
-export { OsmXmlNode, OsmXmlWay, OsmXmlTag, OsmXmlChange, ChangeWithMetadata, IdMapping };

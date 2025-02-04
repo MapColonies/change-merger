@@ -1,23 +1,23 @@
-{{- $chartName := include "change-merger.name" . -}}
 {{- $tracingUrl := include "change-merger.tracingUrl" . -}}
 {{- $metricsUrl := include "change-merger.metricsUrl" . -}}
 {{- if .Values.enabled -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Release.Name }}-{{ $chartName }}-configmap
+  name: {{ printf "%s-configmap" (include "change-merger.fullname" .) }}
 data:
   REQUEST_PAYLOAD_LIMIT: {{ .Values.env.requestPayloadLimit | quote }}
   RESPONSE_COMPRESSION_ENABLED: {{ .Values.env.responseCompressionEnabled | quote }}
   LOG_LEVEL: {{ .Values.env.logLevel | quote }}
-  LOG_PRETTY_PRINT_ENABLED: "false"
+  LOG_PRETTY_PRINT_ENABLED: {{ .Values.env.logPrettyPrintEnabled | quote }}
   {{ if .Values.env.tracing.enabled }}
   TELEMETRY_TRACING_ENABLED: 'true'
   TELEMETRY_TRACING_URL: {{ $tracingUrl }}
-  TELEMETRY_TRACING_RATIO: {{ .Values.env.tracing.ratio | quote }}
   {{ end }}
   {{ if .Values.env.metrics.enabled }}
   TELEMETRY_METRICS_ENABLED: 'true'
   TELEMETRY_METRICS_URL: {{ $metricsUrl }}
   {{ end }}
+  npm_config_cache: /tmp/
+  APP_EXTERNAL_ID_TAG: {{ .Values.env.app.externalIdTag }}
 {{- end }}

@@ -1,5 +1,5 @@
 import { BaseElement } from '@map-colonies/node-osm-elements';
-import { ChangeWithMetadata } from '../src/change/models/types';
+import { ChangeWithMetadata } from '../src/change/models/change';
 
 export const getSampleData = (): ChangeWithMetadata[] => [
   {

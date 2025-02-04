@@ -1,5 +1,5 @@
 import { OsmNode, OsmWay } from '@map-colonies/node-osm-elements';
-import { OsmXmlNode, OsmXmlWay, OsmXmlTag } from './types';
+import { OsmXmlNode, OsmXmlTag, OsmXmlWay } from './change';
 
 const createOsmXmlTag = (oldTags?: Record<string, string>): OsmXmlTag[] => {
   if (!oldTags) {
