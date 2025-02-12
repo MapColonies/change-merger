@@ -52,7 +52,7 @@ export class ChangeManager {
       const tags = Array.isArray(element.tag) ? element.tag : [element.tag];
       const externalIdTag = tags.find((tag) => tag.k === this.config.get('app.externalIdTag'));
       if (externalIdTag) {
-        mapping.push({ osmId: element.id, externalId: externalIdTag.v });
+        mapping.push({ osmId: +element.id, externalId: externalIdTag.v });
       }
     });
 

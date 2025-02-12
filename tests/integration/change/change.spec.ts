@@ -133,7 +133,7 @@ describe('change', function () {
           modify: [{ node: { id: 2, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value2' } } }],
           delete: [{ node: { id: 3, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value3' } } }],
         };
-        const expected = { created: [{ osmId: '1', externalId: 'value1' }], deleted: [{ osmId: '3', externalId: 'value3' }] };
+        const expected = { created: [{ osmId: 1, externalId: 'value1' }], deleted: [{ osmId: 3, externalId: 'value3' }] };
 
         const response = await requestSender.postInterpretChange(app, { osmChange: change });
 
@@ -163,7 +163,7 @@ describe('change', function () {
             },
           ],
         };
-        const expected = { created: [{ osmId: '1', externalId: 'value1' }], deleted: [{ osmId: '3', externalId: 'value3' }] };
+        const expected = { created: [{ osmId: 1, externalId: 'value1' }], deleted: [{ osmId: 3, externalId: 'value3' }] };
 
         const response = await requestSender.postInterpretChange(app, { osmChange: change });
 
@@ -177,7 +177,7 @@ describe('change', function () {
           version: '0.6',
           create: [{ node: { id: 1, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value1' } } }],
         };
-        const expected = { created: [{ osmId: '1', externalId: 'value1' }], deleted: [] };
+        const expected = { created: [{ osmId: 1, externalId: 'value1' }], deleted: [] };
 
         const response = await requestSender.postInterpretChange(app, { osmChange: change });
 
@@ -191,7 +191,7 @@ describe('change', function () {
           version: '0.6',
           delete: [{ node: { id: 1, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value1' } } }],
         };
-        const expected = { created: [], deleted: [{ osmId: '1', externalId: 'value1' }] };
+        const expected = { created: [], deleted: [{ osmId: 1, externalId: 'value1' }] };
 
         const response = await requestSender.postInterpretChange(app, { osmChange: change });
 
@@ -225,12 +225,12 @@ describe('change', function () {
         };
         const expected = {
           created: [
-            { osmId: '1', externalId: 'value1' },
-            { osmId: '4', externalId: 'value4' },
+            { osmId: 1, externalId: 'value1' },
+            { osmId: 4, externalId: 'value4' },
           ],
           deleted: [
-            { osmId: '9', externalId: 'value9' },
-            { osmId: '12', externalId: 'value12' },
+            { osmId: 9, externalId: 'value9' },
+            { osmId: 12, externalId: 'value12' },
           ],
         };
 
@@ -255,12 +255,12 @@ describe('change', function () {
         };
         const expected = {
           created: [
-            { osmId: '1', externalId: 'node1' },
-            { osmId: '1', externalId: 'way1' },
+            { osmId: 1, externalId: 'node1' },
+            { osmId: 1, externalId: 'way1' },
           ],
           deleted: [
-            { osmId: '2', externalId: 'node2' },
-            { osmId: '2', externalId: 'way2' },
+            { osmId: 2, externalId: 'node2' },
+            { osmId: 2, externalId: 'way2' },
           ],
         };
 
