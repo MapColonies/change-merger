@@ -1,3 +1,5 @@
+type OsmElementType = 'node' | 'way' | 'relation';
+
 export interface IdMapping {
   externalId: string;
   tempOsmId: number;
@@ -10,6 +12,7 @@ export interface MergeResult {
 }
 
 export interface InterpretedMapping {
+  type: OsmElementType;
   externalId: string;
   osmId: number;
 }

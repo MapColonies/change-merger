@@ -1,10 +1,11 @@
 import { Logger } from '@map-colonies/js-logger';
 import { inject, injectable } from 'tsyringe';
 import { ConfigType } from '@src/common/config';
+import { OsmElementType } from '@map-colonies/node-osm-elements';
 import { SERVICES } from '../../common/constants';
 import { convertToXml } from '../utils/jsonToXml';
 import { mergeChanges } from './merger';
-import { ChangeWithMetadata, ElementChange, OsmXmlChange } from './change';
+import { ChangeWithMetadata, ElementChange, OsmXmlChange, OsmXmlNode, OsmXmlWay } from './change';
 import { IdMapping, InterpretedMapping, InterpretResult } from './types';
 
 @injectable()
@@ -41,7 +42,15 @@ export class ChangeManager {
       }
 
       // determine if node or way
-      const element = 'node' in wrappedElement ? wrappedElement.node : wrappedElement.way;
+      let element: OsmXmlNode | OsmXmlWay;
+      let type: OsmElementType;
+      if ('node' in wrappedElement) {
+        element = wrappedElement.node;
+        type = 'node';
+      } else {
+        element = wrappedElement.way;
+        type = 'way';
+      }
 
       // skip element with no tags
       if (element.tag === undefined) {
@@ -52,7 +61,7 @@ export class ChangeManager {
       const tags = Array.isArray(element.tag) ? element.tag : [element.tag];
       const externalIdTag = tags.find((tag) => tag.k === this.config.get('app.externalIdTag'));
       if (externalIdTag) {
-        mapping.push({ osmId: +element.id, externalId: externalIdTag.v });
+        mapping.push({ type, osmId: +element.id, externalId: externalIdTag.v });
       }
     });
 

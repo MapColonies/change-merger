@@ -66,7 +66,10 @@ describe('changeManager', function () {
         modify: [{ node: { id: 2, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value2' } } }],
         delete: [{ node: { id: 3, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value3' } } }],
       };
-      const expected: InterpretResult = { created: [{ osmId: 1, externalId: 'value1' }], deleted: [{ osmId: 3, externalId: 'value3' }] };
+      const expected: InterpretResult = {
+        created: [{ type: 'node', osmId: 1, externalId: 'value1' }],
+        deleted: [{ type: 'node', osmId: 3, externalId: 'value3' }],
+      };
 
       const interpretation = manager.interpretChange(change);
 
@@ -81,7 +84,10 @@ describe('changeManager', function () {
         modify: { node: { id: 2, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value2' } } },
         delete: { node: { id: 3, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value3' } } },
       };
-      const expected: InterpretResult = { created: [{ osmId: 1, externalId: 'value1' }], deleted: [{ osmId: 3, externalId: 'value3' }] };
+      const expected: InterpretResult = {
+        created: [{ type: 'node', osmId: 1, externalId: 'value1' }],
+        deleted: [{ type: 'node', osmId: 3, externalId: 'value3' }],
+      };
 
       const interpretation = manager.interpretChange(change);
 
@@ -110,7 +116,10 @@ describe('changeManager', function () {
           },
         ],
       };
-      const expected: InterpretResult = { created: [{ osmId: 1, externalId: 'value1' }], deleted: [{ osmId: 3, externalId: 'value3' }] };
+      const expected: InterpretResult = {
+        created: [{ type: 'node', osmId: 1, externalId: 'value1' }],
+        deleted: [{ type: 'node', osmId: 3, externalId: 'value3' }],
+      };
 
       const interpretation = manager.interpretChange(change);
 
@@ -123,7 +132,7 @@ describe('changeManager', function () {
         version: '0.6',
         create: [{ node: { id: 1, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value1' } } }],
       };
-      const expected: InterpretResult = { created: [{ osmId: 1, externalId: 'value1' }], deleted: [] };
+      const expected: InterpretResult = { created: [{ type: 'node', osmId: 1, externalId: 'value1' }], deleted: [] };
 
       const interpretation = manager.interpretChange(change);
 
@@ -136,7 +145,7 @@ describe('changeManager', function () {
         version: '0.6',
         delete: [{ node: { id: 1, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value1' } } }],
       };
-      const expected: InterpretResult = { created: [], deleted: [{ osmId: 1, externalId: 'value1' }] };
+      const expected: InterpretResult = { created: [], deleted: [{ type: 'node', osmId: 1, externalId: 'value1' }] };
 
       const interpretation = manager.interpretChange(change);
 
@@ -169,12 +178,12 @@ describe('changeManager', function () {
       };
       const expected: InterpretResult = {
         created: [
-          { osmId: 1, externalId: 'value1' },
-          { osmId: 4, externalId: 'value4' },
+          { type: 'node', osmId: 1, externalId: 'value1' },
+          { type: 'way', osmId: 4, externalId: 'value4' },
         ],
         deleted: [
-          { osmId: 9, externalId: 'value9' },
-          { osmId: 12, externalId: 'value12' },
+          { type: 'node', osmId: 9, externalId: 'value9' },
+          { type: 'way', osmId: 12, externalId: 'value12' },
         ],
       };
 
@@ -198,12 +207,12 @@ describe('changeManager', function () {
       };
       const expected: InterpretResult = {
         created: [
-          { osmId: 1, externalId: 'node1' },
-          { osmId: 1, externalId: 'way1' },
+          { type: 'node', osmId: 1, externalId: 'node1' },
+          { type: 'way', osmId: 1, externalId: 'way1' },
         ],
         deleted: [
-          { osmId: 2, externalId: 'node2' },
-          { osmId: 2, externalId: 'way2' },
+          { type: 'node', osmId: 2, externalId: 'node2' },
+          { type: 'way', osmId: 2, externalId: 'way2' },
         ],
       };
 

@@ -87,11 +87,7 @@ components:
         - id
       properties:
         type:
-          type: string
-          enum:
-            - node
-            - way
-            - relation
+          $ref: '#/components/schemas/OsmElementType'
         id:
           $ref: '#/components/schemas/osmId'
         timestamp:
@@ -220,12 +216,21 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/externalId'
+    OsmElementType:
+      type: string
+      enum:
+        - node
+        - way
+        - relation
     InterpretedMapping:
       type: object
       required:
+        - type
         - externalId
         - osmId
       properties:
+        type:
+          $ref: '#/components/schemas/OsmElementType'
         externalId:
           $ref: '#/components/schemas/externalId'
         osmId:
