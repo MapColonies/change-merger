@@ -7,6 +7,31 @@ info:
     name: MIT
     url: https://opensource.org/licenses/MIT
 paths:
+  /change/interpret:
+    post:
+      operationId: interpretChange
+      summary: interpret a single osm-change into ids for registration
+      tags:
+        - change
+      requestBody:
+        required: true
+        content:
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/OsmChange'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InterpretResult'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
   /change/merge:
     post:
       operationId: mergeChanges
@@ -62,11 +87,7 @@ components:
         - id
       properties:
         type:
-          type: string
-          enum:
-            - node
-            - way
-            - relation
+          $ref: '#/components/schemas/OsmElementType'
         id:
           $ref: '#/components/schemas/osmId'
         timestamp:
@@ -118,8 +139,6 @@ components:
         - $ref: '#/components/schemas/OsmWay'
     OsmChange:
       type: object
-      required:
-        - type
       properties:
         type:
           type: string
@@ -197,3 +216,33 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/externalId'
+    OsmElementType:
+      type: string
+      enum:
+        - node
+        - way
+        - relation
+    InterpretedMapping:
+      type: object
+      required:
+        - type
+        - externalId
+        - osmId
+      properties:
+        type:
+          $ref: '#/components/schemas/OsmElementType'
+        externalId:
+          $ref: '#/components/schemas/externalId'
+        osmId:
+          $ref: '#/components/schemas/osmId'
+    InterpretResult:
+      type: object
+      properties:
+        created:
+          type: array
+          items:
+            $ref: '#/components/schemas/InterpretedMapping'
+        deleted:
+          type: array
+          items:
+            $ref: '#/components/schemas/InterpretedMapping'

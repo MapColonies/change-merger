@@ -2,7 +2,8 @@ import { BaseElement, OsmNode, OsmWay } from '@map-colonies/node-osm-elements';
 import { SERVICE_NAME } from '../../common/constants';
 import { IdGenerator } from '../utils/idGenerator';
 import { createOsmXmlNode, createOsmXmlWay } from './generators';
-import { IdMapping, ChangeWithMetadata, OsmXmlChange, OsmXmlNode, OsmXmlWay } from './types';
+import { ChangeWithMetadata, MergedOsmXmlChange, OsmXmlNode, OsmXmlWay } from './change';
+import { IdMapping } from './types';
 
 const isNode = (element: BaseElement): element is OsmNode => element.type === 'node';
 const isWay = (element: BaseElement): element is OsmWay => element.type === 'way';
@@ -38,10 +39,10 @@ const handleChangeArray = (
   return [nodes, xmlWay];
 };
 
-const handleChangeObj = (changeObj: ChangeWithMetadata, idGenerator: IdGenerator, change: OsmXmlChange, changesetId: number): number => {
+const handleChangeObj = (changeObj: ChangeWithMetadata, idGenerator: IdGenerator, change: MergedOsmXmlChange, changesetId: number): number => {
   const tempMapping = new Map<number, number>();
 
-  const actions: typeof changeObj.action[] = ['create', 'modify', 'delete'];
+  const actions: (typeof changeObj.action)[] = ['create', 'modify', 'delete'];
 
   actions.forEach((action) => {
     const elementArr = changeObj.change[action];
@@ -57,9 +58,9 @@ const handleChangeObj = (changeObj: ChangeWithMetadata, idGenerator: IdGenerator
   return changeObj.tempOsmId !== undefined ? (tempMapping.get(changeObj.tempOsmId) as number) : 0;
 };
 
-const mergeChanges = (changes: ChangeWithMetadata[], changesetId: number): [OsmXmlChange, IdMapping[], string[]] => {
+const mergeChanges = (changes: ChangeWithMetadata[], changesetId: number): [MergedOsmXmlChange, IdMapping[], string[]] => {
   const idGenerator = new IdGenerator();
-  const change: OsmXmlChange = {
+  const change: MergedOsmXmlChange = {
     generator: SERVICE_NAME,
     version: '0.6',
     create: { node: [], way: [] },

@@ -1,6 +1,6 @@
 import { BaseElement } from '@map-colonies/node-osm-elements';
 import { mergeChanges } from '../../../../src/change/models/merger';
-import { ChangeWithMetadata } from '../../../../src/change/models/types';
+import { ChangeWithMetadata } from '../../../../src/change/models/change';
 
 describe('merger', function () {
   describe('#mergeChanges', function () {

@@ -2,8 +2,8 @@
 Expand the name of the chart.
 */}}
 {{- define "change-merger.name" -}}
-{{- default .Chart.Name | trunc 63 | trimSuffix "-" }}
-{{- end }}
+{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
 
 {{/*
 Create a default fully qualified app name.
@@ -11,20 +11,17 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 If release name contains chart name it will be used as a full name.
 */}}
 {{- define "change-merger.fullname" -}}
-{{- $name := default .Chart.Name }}
-{{- if contains $name .Release.Name }}
-{{- .Release.Name | trunc 63 | trimSuffix "-" }}
-{{- else }}
-{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
-{{- end }}
-{{- end }}
-
-{{/*
-Returns the tag of the chart.
-*/}}
-{{- define "change-merger.tag" -}}
-{{- default (printf "v%s" .Chart.AppVersion) .Values.image.tag }}
-{{- end }}
+{{- if .Values.fullnameOverride -}}
+{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name := default .Chart.Name .Values.nameOverride -}}
+{{- if contains $name .Release.Name -}}
+{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
 
 {{/*
 Create chart name and version as used by the chart label.
@@ -43,6 +40,13 @@ helm.sh/chart: {{ include "change-merger.chart" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{/*
+Returns the tag of the chart.
+*/}}
+{{- define "change-merger.tag" -}}
+{{- default (printf "v%s" .Chart.AppVersion) .Values.image.tag }}
 {{- end }}
 
 {{/*
@@ -82,9 +86,21 @@ Returns the cloud provider docker registry url from global if exists or from the
 */}}
 {{- define "change-merger.cloudProviderDockerRegistryUrl" -}}
 {{- if .Values.global.cloudProvider.dockerRegistryUrl }}
-    {{- .Values.global.cloudProvider.dockerRegistryUrl -}}
-{{- else if .Values.cloudProvider -}}
-    {{- .Values.cloudProvider.dockerRegistryUrl -}}
+    {{- printf "%s/" .Values.global.cloudProvider.dockerRegistryUrl -}}
+{{- else if .Values.cloudProvider.dockerRegistryUrl -}}
+    {{- printf "%s/" .Values.cloudProvider.dockerRegistryUrl -}}
+{{- else -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Returns the cloud provider image pull secret name from global if exists or from the chart's values
+*/}}
+{{- define "change-merger.cloudProviderImagePullSecretName" -}}
+{{- if .Values.global.cloudProvider.imagePullSecretName }}
+    {{- .Values.global.cloudProvider.imagePullSecretName -}}
+{{- else if .Values.cloudProvider.imagePullSecretName -}}
+    {{- .Values.cloudProvider.imagePullSecretName -}}
 {{- end -}}
 {{- end -}}
 
@@ -94,7 +110,7 @@ Returns the tracing url from global if exists or from the chart's values
 {{- define "change-merger.tracingUrl" -}}
 {{- if .Values.global.tracing.url }}
     {{- .Values.global.tracing.url -}}
-{{- else -}}
+{{- else if .Values.cloudProvider -}}
     {{- .Values.env.tracing.url -}}
 {{- end -}}
 {{- end -}}
