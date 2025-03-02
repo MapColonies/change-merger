@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.4.0](https://github.com/MapColonies/change-merger/compare/v1.3.5...v1.4.0) (2025-03-02)
+
+
+### Features
+
+* **change:** osm-change-xml interpretation endpoint ([#94](https://github.com/MapColonies/change-merger/issues/94)) ([fdc9107](https://github.com/MapColonies/change-merger/commit/fdc9107f970e9d702ce9bef3fb65c6b7a2097098))
+
 ### [1.3.5](https://github.com/MapColonies/change-merger/compare/v1.3.4...v1.3.5) (2022-08-14)
 
 
