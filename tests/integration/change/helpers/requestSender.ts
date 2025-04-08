@@ -2,7 +2,7 @@ import * as supertest from 'supertest';
 import { Application } from 'express';
 import { MergeChangesRequestBody } from '../../../../src/change/controllers/changeController';
 import { OsmXmlChange } from '../../../../src/change/models/change';
-import { convertToXml } from '../../../../src/change/utils/jsonToXml';
+import { convertToXml } from '../../../../src/change/utils/xml';
 
 export async function postMergeChanges(app: Application, body: MergeChangesRequestBody): Promise<supertest.Response> {
   return supertest.agent(app).post('/change/merge').set('Content-Type', 'application/json').send(body);

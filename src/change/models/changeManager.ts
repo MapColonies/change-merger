@@ -3,10 +3,10 @@ import { inject, injectable } from 'tsyringe';
 import { ConfigType } from '@src/common/config';
 import { OsmElementType } from '@map-colonies/node-osm-elements';
 import { SERVICES } from '../../common/constants';
-import { convertToXml } from '../utils/jsonToXml';
+import { convertToXml } from '../utils/xml';
 import { mergeChanges } from './merger';
 import { ChangeWithMetadata, ElementChange, OsmXmlChange, OsmXmlNode, OsmXmlWay } from './change';
-import { IdMapping, InterpretedMapping, InterpretResult } from './types';
+import { IdMapping, InterpretAction, InterpretedMapping, InterpretResult } from './types';
 
 @injectable()
 export class ChangeManager {
@@ -22,12 +22,19 @@ export class ChangeManager {
     return [convertToXml({ osmChange: change }), idsToCreate, idsToDelete];
   }
 
-  public interpretChange(change: OsmXmlChange): InterpretResult {
-    this.logger.info({ msg: 'started change interpret' });
+  public interpretChange(change: OsmXmlChange, actions?: InterpretAction[]): Partial<InterpretResult> {
+    let created, deleted;
+
+    this.logger.info({ msg: 'started change interpret', actions });
 
     // due to xml parsing convertion possibly converting a single item array to just the item, we'll safely check beforehand
-    const created = change.create ? (Array.isArray(change.create) ? this.interpret(change.create) : this.interpret([change.create])) : [];
-    const deleted = change.delete ? (Array.isArray(change.delete) ? this.interpret(change.delete) : this.interpret([change.delete])) : [];
+    if (!actions || actions.includes('create')) {
+      created = change.create ? (Array.isArray(change.create) ? this.interpret(change.create) : this.interpret([change.create])) : [];
+    }
+
+    if (!actions || actions.includes('delete')) {
+      deleted = change.delete ? (Array.isArray(change.delete) ? this.interpret(change.delete) : this.interpret([change.delete])) : [];
+    }
 
     return { created, deleted };
   }

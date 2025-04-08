@@ -11,6 +11,8 @@ export interface MergeResult {
   deleted: string[];
 }
 
+export type InterpretAction = 'create' | 'delete';
+
 export interface InterpretedMapping {
   type: OsmElementType;
   externalId: string;

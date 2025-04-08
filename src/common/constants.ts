@@ -13,6 +13,7 @@ export const SERVICES = {
   TRACER: Symbol('Tracer'),
   METRICS: Symbol('Metrics'),
   CLEANUP_REGISTRY: Symbol('CleanupRegistry'),
+  HTTP_CLIENT: Symbol('HttpClient'),
 } satisfies Record<string, symbol>;
 /* eslint-enable @typescript-eslint/naming-convention */
 
@@ -20,3 +21,5 @@ export const stubHealthCheck = async (): Promise<void> => Promise.resolve();
 
 export const HEALTHCHECK = Symbol('Healthcheck');
 export const ON_SIGNAL = Symbol('OnSignal');
+
+export const X_API_KEY_HEADER = 'x-api-key';
