@@ -19,5 +19,9 @@ data:
   TELEMETRY_METRICS_URL: {{ $metricsUrl }}
   {{ end }}
   npm_config_cache: /tmp/
-  APP_EXTERNAL_ID_TAG: {{ .Values.env.app.externalIdTag }}
+  APP_EXTERNAL_ID_TAG: {{ .Values.env.app.externalIdTag  | quote }}
+  APP_REMOTE_API_BASE_URL: {{ .Values.env.app.remote.api.baseUrl | quote }}
+  APP_REMOTE_API_TIMEOUT_MS: {{ .Values.env.app.remote.api.timeoutMs | quote }}
+  APP_REMOTE_REPLICATION_BASE_URL: {{ .Values.env.app.remote.replication.baseUrl | quote }}
+  APP_REMOTE_REPLICATION_TIMEOUT_MS: {{ .Values.env.app.remote.replication.timeoutMs | quote }}
 {{- end }}
