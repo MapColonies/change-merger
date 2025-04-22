@@ -76,6 +76,58 @@ describe('changeManager', function () {
       expect(interpretation).toMatchObject(expected);
     });
 
+    it('should create an accurate interpretation of created and deleted result from a change', function () {
+      const change: OsmXmlChange = {
+        generator: 'test',
+        version: '0.6',
+        create: [{ node: { id: 1, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value1' } } }],
+        modify: [{ node: { id: 2, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value2' } } }],
+        delete: [{ node: { id: 3, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value3' } } }],
+      };
+      const expected: InterpretResult = {
+        created: [{ type: 'node', osmId: 1, externalId: 'value1' }],
+        deleted: [{ type: 'node', osmId: 3, externalId: 'value3' }],
+      };
+
+      const interpretation = manager.interpretChange(change, ['create', 'delete']);
+
+      expect(interpretation).toMatchObject(expected);
+    });
+
+    it('should create an accurate interpretation of only the created result from a change', function () {
+      const change: OsmXmlChange = {
+        generator: 'test',
+        version: '0.6',
+        create: [{ node: { id: 1, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value1' } } }],
+        modify: [{ node: { id: 2, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value2' } } }],
+        delete: [{ node: { id: 3, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value3' } } }],
+      };
+      const expected: Partial<InterpretResult> = {
+        created: [{ type: 'node', osmId: 1, externalId: 'value1' }],
+      };
+
+      const interpretation = manager.interpretChange(change, ['create']);
+
+      expect(interpretation).toMatchObject(expected);
+    });
+
+    it('should create an accurate interpretation of only the deleted result from a change', function () {
+      const change: OsmXmlChange = {
+        generator: 'test',
+        version: '0.6',
+        create: [{ node: { id: 1, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value1' } } }],
+        modify: [{ node: { id: 2, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value2' } } }],
+        delete: [{ node: { id: 3, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value3' } } }],
+      };
+      const expected: Partial<InterpretResult> = {
+        deleted: [{ type: 'node', osmId: 3, externalId: 'value3' }],
+      };
+
+      const interpretation = manager.interpretChange(change, ['delete']);
+
+      expect(interpretation).toMatchObject(expected);
+    });
+
     it('should create an accurate interpretation result from a change with a single item as actions', function () {
       const change: OsmXmlChange = {
         generator: 'test',

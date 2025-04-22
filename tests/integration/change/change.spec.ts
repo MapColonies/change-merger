@@ -1,5 +1,6 @@
 import httpStatusCodes from 'http-status-codes';
 import { DependencyContainer } from 'tsyringe';
+import nock from 'nock';
 import { Application } from 'express';
 import { getApp } from '@src/app';
 import { trace } from '@opentelemetry/api';
@@ -10,12 +11,27 @@ import { MergeChangesRequestBody } from '../../../src/change/controllers/changeC
 import { SERVICES } from '../../../src/common/constants';
 import { getSampleData } from '../../sampleData';
 import { ChangeWithMetadata, OsmXmlChange } from '../../../src/change/models/change';
+import { convertToXml } from '../../../src/change/utils/xml';
+import * as changeUtils from '../../../src/change/utils/';
+import { InterpretAction } from '../../../src/change/models/types';
 import * as requestSender from './helpers/requestSender';
+
+jest.mock('../../../src/change/utils', (): object => {
+  return {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    __esModule: true,
+    ...jest.requireActual('../../../src/change/utils'),
+  };
+});
 
 describe('change', function () {
   let app: Application;
   let container: DependencyContainer;
   let configInstance: ConfigType;
+  let remoteApiUrl: string;
+  let remoteReplicationUrl: string;
+  let remoteApiInterceptor: nock.Interceptor;
+  let remoteReplicationInterceptor: nock.Interceptor;
 
   beforeAll(async function () {
     configInstance = getConfig();
@@ -39,10 +55,18 @@ describe('change', function () {
 
     app = initializedApp;
     container = initializedContainer;
+    const config = container.resolve<ConfigType>(SERVICES.CONFIG);
+
+    remoteApiUrl = config.get('app.remote.api.baseUrl');
+    remoteReplicationUrl = config.get('app.remote.replication.baseUrl');
+    remoteApiInterceptor = nock(remoteApiUrl).get(/.*/);
+    remoteReplicationInterceptor = nock(remoteReplicationUrl).get(/.*/);
   });
 
   afterEach(function () {
     jest.resetAllMocks();
+    nock.removeInterceptor(remoteApiInterceptor);
+    nock.removeInterceptor(remoteReplicationInterceptor);
   });
 
   afterAll(async function () {
@@ -280,6 +304,142 @@ describe('change', function () {
 
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(response.body).toMatchObject(expected);
+      });
+    });
+  });
+
+  describe('/GET /change/{changesetId}/interpret', function () {
+    describe('Happy Path', function () {
+      it('should execute a get request to the remote api and interpret the change', async function () {
+        const change: { osmChange: OsmXmlChange } = { osmChange: { generator: 'test', version: '0.6' } };
+        const xml = convertToXml(change);
+        const scope = remoteApiInterceptor.reply(httpStatusCodes.OK, xml);
+
+        const response = await requestSender.getInterpretation(app, '666', 'api');
+
+        expect(response.status).toBe(httpStatusCodes.OK);
+        expect(response.body).toMatchObject({ created: [], deleted: [] });
+
+        scope.done();
+      });
+
+      it('should execute a get request to the remote replication and interpret the change', async function () {
+        const change: { osmChange: OsmXmlChange } = { osmChange: { generator: 'test', version: '0.6' } };
+        const xml = convertToXml(change);
+        const unzipAsyncSpy = jest.spyOn(changeUtils, 'unzipAsync').mockResolvedValue(Buffer.from(xml));
+        const scope = remoteReplicationInterceptor.reply(httpStatusCodes.OK, xml);
+
+        const response = await requestSender.getInterpretation(app, '666', 'replication');
+
+        expect(response.status).toBe(httpStatusCodes.OK);
+        expect(response.body).toMatchObject({ created: [], deleted: [] });
+        expect(unzipAsyncSpy).toHaveBeenCalledTimes(1);
+
+        scope.done();
+      });
+
+      it('should execute a get request to the remote api and interpret the change with result', async function () {
+        const change: { osmChange: OsmXmlChange } = {
+          osmChange: {
+            generator: 'test',
+            version: '0.6',
+            create: [{ node: { id: 1, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value1' } } }],
+            modify: [{ node: { id: 2, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value2' } } }],
+            delete: [{ node: { id: 3, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value3' } } }],
+          },
+        };
+        const expected = { created: [{ osmId: 1, externalId: 'value1' }], deleted: [{ osmId: 3, externalId: 'value3' }] };
+        const xml = convertToXml(change);
+        const scope = remoteApiInterceptor.reply(httpStatusCodes.OK, xml);
+
+        const response = await requestSender.getInterpretation(app, '666', 'api', ['create', 'delete']);
+
+        expect(response.status).toBe(httpStatusCodes.OK);
+        expect(response.body).toMatchObject(expected);
+
+        scope.done();
+      });
+
+      it('should execute a get request to the remote replication and interpret the change with result', async function () {
+        const change: { osmChange: OsmXmlChange } = {
+          osmChange: {
+            generator: 'test',
+            version: '0.6',
+            create: [{ node: { id: 1, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value1' } } }],
+            modify: [{ node: { id: 2, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value2' } } }],
+            delete: [{ node: { id: 3, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value3' } } }],
+          },
+        };
+        const expected = { deleted: [{ osmId: 3, externalId: 'value3' }] };
+        const xml = convertToXml(change);
+        const unzipAsyncSpy = jest.spyOn(changeUtils, 'unzipAsync').mockResolvedValue(Buffer.from(xml));
+        const scope = remoteReplicationInterceptor.reply(httpStatusCodes.OK, xml);
+
+        const response = await requestSender.getInterpretation(app, '666', 'replication', ['delete']);
+
+        expect(response.status).toBe(httpStatusCodes.OK);
+        expect(response.body).toMatchObject(expected);
+        expect(unzipAsyncSpy).toHaveBeenCalledTimes(1);
+
+        scope.done();
+      });
+    });
+
+    describe('Bad Path', function () {
+      it('should fail on duplicate action on remote api', async function () {
+        const response = await requestSender.getInterpretation(app, '666', 'api', ['create', 'create', 'create']);
+
+        expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
+        expect(response.body).toStrictEqual({ message: 'request/query/action must NOT have duplicate items (items ## 1 and 2 are identical)' });
+      });
+
+      it('should fail on unknown action on remote replication', async function () {
+        const response = await requestSender.getInterpretation(app, '666', 'replication', ['avi'] as unknown as InterpretAction[]);
+
+        expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
+        expect(response.body).toStrictEqual({ message: 'request/query/action/0 must be equal to one of the allowed values: create, delete' });
+      });
+
+      it('should return not found if remote api changeset was not found', async function () {
+        const scope = remoteApiInterceptor.reply(httpStatusCodes.NOT_FOUND);
+
+        const response = await requestSender.getInterpretation(app, '666', 'api');
+
+        expect(response.status).toBe(httpStatusCodes.NOT_FOUND);
+
+        scope.done();
+      });
+
+      it('should return not found if remote replication changeset was not found', async function () {
+        const scope = remoteReplicationInterceptor.reply(httpStatusCodes.NOT_FOUND);
+
+        const response = await requestSender.getInterpretation(app, '666', 'replication');
+
+        expect(response.status).toBe(httpStatusCodes.NOT_FOUND);
+
+        scope.done();
+      });
+    });
+
+    describe('Sad Path', function () {
+      it('should return internal error if remote api errored', async function () {
+        const scope = remoteApiInterceptor.replyWithError({ message: 'error' });
+
+        const response = await requestSender.getInterpretation(app, '666', 'api');
+
+        expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
+
+        scope.done();
+      });
+
+      it('should return internal error if remote replication errored', async function () {
+        const scope = remoteReplicationInterceptor.replyWithError({ message: 'error' });
+
+        const response = await requestSender.getInterpretation(app, '666', 'replication');
+
+        expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
+
+        scope.done();
       });
     });
   });
