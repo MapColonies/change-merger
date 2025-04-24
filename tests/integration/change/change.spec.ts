@@ -57,8 +57,8 @@ describe('change', function () {
     container = initializedContainer;
     const config = container.resolve<ConfigType>(SERVICES.CONFIG);
 
-    remoteApiUrl = config.get('app.remote.api.baseUrl') as string;
-    remoteReplicationUrl = config.get('app.remote.replication.baseUrl') as string;
+    remoteApiUrl = config.get('app.remote.api.baseUrl') as unknown as string;
+    remoteReplicationUrl = config.get('app.remote.replication.baseUrl') as unknown as string;
     remoteApiInterceptor = nock(remoteApiUrl).get(/.*/);
     remoteReplicationInterceptor = nock(remoteReplicationUrl).get(/.*/);
   });
