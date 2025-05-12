@@ -10,10 +10,6 @@ import { formatChangesetId, unzipAsync } from '@src/change/utils';
 import { clientFactory } from './factory';
 import { RemoteChangeKind } from './options';
 
-export interface IChangeClient {
-  downloadChange: (remote: RemoteChangeKind, changesetId: string) => Promise<OsmXmlChange>;
-}
-
 @injectable()
 export class ChangeClient {
   private readonly apiClient: AxiosInstance;

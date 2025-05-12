@@ -14,7 +14,7 @@ import { ChangeWithMetadata, OsmXmlChange } from '../../../src/change/models/cha
 import { convertToXml } from '../../../src/change/utils/xml';
 import * as changeUtils from '../../../src/change/utils/';
 import { InterpretAction } from '../../../src/change/models/types';
-import * as requestSender from './helpers/requestSender';
+import { ChangeRequestSender } from './helpers/requestSender';
 
 jest.mock('../../../src/change/utils', (): object => {
   return {
@@ -27,6 +27,7 @@ jest.mock('../../../src/change/utils', (): object => {
 describe('change', function () {
   let app: Application;
   let container: DependencyContainer;
+  let requestSender: ChangeRequestSender;
   let configInstance: ConfigType;
   let remoteApiUrl: string;
   let remoteReplicationUrl: string;
@@ -55,6 +56,8 @@ describe('change', function () {
 
     app = initializedApp;
     container = initializedContainer;
+
+    requestSender = new ChangeRequestSender(app);
     const config = container.resolve<ConfigType>(SERVICES.CONFIG);
 
     remoteApiUrl = config.get('app.remote.api.baseUrl') as unknown as string;
@@ -80,7 +83,7 @@ describe('change', function () {
       it('should return 200 status code and the resource', async function () {
         const requestBody: MergeChangesRequestBody = { changesetId: 3, changes: getSampleData() };
 
-        const response = await requestSender.postMergeChanges(app, requestBody);
+        const response = await requestSender.postMergeChanges(requestBody);
 
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(response.body).toMatchSnapshot();
@@ -91,7 +94,7 @@ describe('change', function () {
       it('should fail if changesetId is not a number', async function () {
         const requestBody = { changesetId: 'aa', changes: getSampleData() } as unknown as MergeChangesRequestBody;
 
-        const response = await requestSender.postMergeChanges(app, requestBody);
+        const response = await requestSender.postMergeChanges(requestBody);
 
         expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
         expect(response.body).toHaveProperty('message', 'request/body/changesetId must be number');
@@ -102,7 +105,7 @@ describe('change', function () {
         changes[0].action = 'xd' as 'create';
         const requestBody = { changesetId: 1, changes: changes } as unknown as MergeChangesRequestBody;
 
-        const response = await requestSender.postMergeChanges(app, requestBody);
+        const response = await requestSender.postMergeChanges(requestBody);
 
         expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
         expect(response.body).toHaveProperty(
@@ -117,7 +120,7 @@ describe('change', function () {
         changes[0] = newChange as ChangeWithMetadata;
         const requestBody = { changesetId: 1, changes: changes } as unknown as MergeChangesRequestBody;
 
-        const response = await requestSender.postMergeChanges(app, requestBody);
+        const response = await requestSender.postMergeChanges(requestBody);
 
         expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
         expect(response.body).toHaveProperty('message', "request/body/changes/0 must have required property 'externalId'");
@@ -130,10 +133,10 @@ describe('change', function () {
       it('should interpret empty change as empty created and empty deleted', async function () {
         const change: OsmXmlChange = { generator: 'test', version: '0.6' };
 
-        const response = await requestSender.postInterpretChange(app, { osmChange: change });
+        const response = await requestSender.postInterpretChange({ osmChange: change });
 
         expect(response.status).toBe(httpStatusCodes.OK);
-        expect(response.body).toMatchObject({ created: [], deleted: [] });
+        expect(response.body).toEqual({ created: [], deleted: [] });
       });
 
       it('should create an empty result for a change with only modify changes', async function () {
@@ -143,10 +146,10 @@ describe('change', function () {
           modify: [{ node: { id: 1, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value' } } }],
         };
 
-        const response = await requestSender.postInterpretChange(app, { osmChange: change });
+        const response = await requestSender.postInterpretChange({ osmChange: change });
 
         expect(response.status).toBe(httpStatusCodes.OK);
-        expect(response.body).toMatchObject({ created: [], deleted: [] });
+        expect(response.body).toEqual({ created: [], deleted: [] });
       });
 
       it('should create an accurate interpretation result from a change', async function () {
@@ -159,7 +162,7 @@ describe('change', function () {
         };
         const expected = { created: [{ osmId: 1, externalId: 'value1' }], deleted: [{ osmId: 3, externalId: 'value3' }] };
 
-        const response = await requestSender.postInterpretChange(app, { osmChange: change });
+        const response = await requestSender.postInterpretChange({ osmChange: change });
 
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(response.body).toMatchObject(expected);
@@ -189,7 +192,7 @@ describe('change', function () {
         };
         const expected = { created: [{ osmId: 1, externalId: 'value1' }], deleted: [{ osmId: 3, externalId: 'value3' }] };
 
-        const response = await requestSender.postInterpretChange(app, { osmChange: change });
+        const response = await requestSender.postInterpretChange({ osmChange: change });
 
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(response.body).toMatchObject(expected);
@@ -203,7 +206,7 @@ describe('change', function () {
         };
         const expected = { created: [{ osmId: 1, externalId: 'value1' }], deleted: [] };
 
-        const response = await requestSender.postInterpretChange(app, { osmChange: change });
+        const response = await requestSender.postInterpretChange({ osmChange: change });
 
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(response.body).toMatchObject(expected);
@@ -217,7 +220,7 @@ describe('change', function () {
         };
         const expected = { created: [], deleted: [{ osmId: 1, externalId: 'value1' }] };
 
-        const response = await requestSender.postInterpretChange(app, { osmChange: change });
+        const response = await requestSender.postInterpretChange({ osmChange: change });
 
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(response.body).toMatchObject(expected);
@@ -258,7 +261,7 @@ describe('change', function () {
           ],
         };
 
-        const response = await requestSender.postInterpretChange(app, { osmChange: change });
+        const response = await requestSender.postInterpretChange({ osmChange: change });
 
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(response.body).toMatchObject(expected);
@@ -288,7 +291,7 @@ describe('change', function () {
           ],
         };
 
-        const response = await requestSender.postInterpretChange(app, { osmChange: change });
+        const response = await requestSender.postInterpretChange({ osmChange: change });
 
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(response.body).toMatchObject(expected);
@@ -300,10 +303,10 @@ describe('change', function () {
         } as unknown as OsmXmlChange;
         const expected = { created: [], deleted: [] };
 
-        const response = await requestSender.postInterpretChange(app, { osmChange: change });
+        const response = await requestSender.postInterpretChange({ osmChange: change });
 
         expect(response.status).toBe(httpStatusCodes.OK);
-        expect(response.body).toMatchObject(expected);
+        expect(response.body).toEqual(expected);
       });
     });
   });
@@ -315,10 +318,10 @@ describe('change', function () {
         const xml = convertToXml(change);
         const scope = remoteApiInterceptor.reply(httpStatusCodes.OK, xml);
 
-        const response = await requestSender.getInterpretation(app, '666', 'api');
+        const response = await requestSender.getInterpretation('666', 'api');
 
         expect(response.status).toBe(httpStatusCodes.OK);
-        expect(response.body).toMatchObject({ created: [], deleted: [] });
+        expect(response.body).toEqual({ created: [], deleted: [] });
 
         scope.done();
       });
@@ -329,10 +332,10 @@ describe('change', function () {
         const unzipAsyncSpy = jest.spyOn(changeUtils, 'unzipAsync').mockResolvedValue(Buffer.from(xml));
         const scope = remoteReplicationInterceptor.reply(httpStatusCodes.OK, xml);
 
-        const response = await requestSender.getInterpretation(app, '666', 'replication');
+        const response = await requestSender.getInterpretation('666', 'replication');
 
         expect(response.status).toBe(httpStatusCodes.OK);
-        expect(response.body).toMatchObject({ created: [], deleted: [] });
+        expect(response.body).toEqual({ created: [], deleted: [] });
         expect(unzipAsyncSpy).toHaveBeenCalledTimes(1);
 
         scope.done();
@@ -352,7 +355,7 @@ describe('change', function () {
         const xml = convertToXml(change);
         const scope = remoteApiInterceptor.reply(httpStatusCodes.OK, xml);
 
-        const response = await requestSender.getInterpretation(app, '666', 'api', ['create', 'delete']);
+        const response = await requestSender.getInterpretation('666', 'api', ['create', 'delete']);
 
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(response.body).toMatchObject(expected);
@@ -375,7 +378,7 @@ describe('change', function () {
         const unzipAsyncSpy = jest.spyOn(changeUtils, 'unzipAsync').mockResolvedValue(Buffer.from(xml));
         const scope = remoteReplicationInterceptor.reply(httpStatusCodes.OK, xml);
 
-        const response = await requestSender.getInterpretation(app, '666', 'replication', ['delete']);
+        const response = await requestSender.getInterpretation('666', 'replication', ['delete']);
 
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(response.body).toMatchObject(expected);
@@ -387,14 +390,14 @@ describe('change', function () {
 
     describe('Bad Path', function () {
       it('should fail on duplicate action on remote api', async function () {
-        const response = await requestSender.getInterpretation(app, '666', 'api', ['create', 'create', 'create']);
+        const response = await requestSender.getInterpretation('666', 'api', ['create', 'create', 'create']);
 
         expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
         expect(response.body).toStrictEqual({ message: 'request/query/action must NOT have duplicate items (items ## 1 and 2 are identical)' });
       });
 
       it('should fail on unknown action on remote replication', async function () {
-        const response = await requestSender.getInterpretation(app, '666', 'replication', ['avi'] as unknown as InterpretAction[]);
+        const response = await requestSender.getInterpretation('666', 'replication', ['avi'] as unknown as InterpretAction[]);
 
         expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
         expect(response.body).toStrictEqual({ message: 'request/query/action/0 must be equal to one of the allowed values: create, delete' });
@@ -403,7 +406,7 @@ describe('change', function () {
       it('should return not found if remote api changeset was not found', async function () {
         const scope = remoteApiInterceptor.reply(httpStatusCodes.NOT_FOUND);
 
-        const response = await requestSender.getInterpretation(app, '666', 'api');
+        const response = await requestSender.getInterpretation('666', 'api');
 
         expect(response.status).toBe(httpStatusCodes.NOT_FOUND);
 
@@ -413,7 +416,7 @@ describe('change', function () {
       it('should return not found if remote replication changeset was not found', async function () {
         const scope = remoteReplicationInterceptor.reply(httpStatusCodes.NOT_FOUND);
 
-        const response = await requestSender.getInterpretation(app, '666', 'replication');
+        const response = await requestSender.getInterpretation('666', 'replication');
 
         expect(response.status).toBe(httpStatusCodes.NOT_FOUND);
 
@@ -425,7 +428,7 @@ describe('change', function () {
       it('should return internal error if remote api errored', async function () {
         const scope = remoteApiInterceptor.replyWithError({ message: 'error' });
 
-        const response = await requestSender.getInterpretation(app, '666', 'api');
+        const response = await requestSender.getInterpretation('666', 'api');
 
         expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
 
@@ -435,7 +438,7 @@ describe('change', function () {
       it('should return internal error if remote replication errored', async function () {
         const scope = remoteReplicationInterceptor.replyWithError({ message: 'error' });
 
-        const response = await requestSender.getInterpretation(app, '666', 'replication');
+        const response = await requestSender.getInterpretation('666', 'replication');
 
         expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
 

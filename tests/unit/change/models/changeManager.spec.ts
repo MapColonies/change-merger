@@ -43,7 +43,7 @@ describe('changeManager', function () {
 
       const interpretation = manager.interpretChange(change);
 
-      expect(interpretation).toMatchObject({ created: [], deleted: [] });
+      expect(interpretation).toEqual({ created: [], deleted: [] });
     });
 
     it('should create an empty result for a change with only modify changes', function () {
@@ -55,7 +55,7 @@ describe('changeManager', function () {
 
       const interpretation = manager.interpretChange(change);
 
-      expect(interpretation).toMatchObject({ created: [], deleted: [] });
+      expect(interpretation).toEqual({ created: [], deleted: [] });
     });
 
     it('should create an accurate interpretation result from a change', function () {

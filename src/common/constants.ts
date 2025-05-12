@@ -13,7 +13,6 @@ export const SERVICES = {
   TRACER: Symbol('Tracer'),
   METRICS: Symbol('Metrics'),
   CLEANUP_REGISTRY: Symbol('CleanupRegistry'),
-  HTTP_CLIENT: Symbol('HttpClient'),
 } satisfies Record<string, symbol>;
 /* eslint-enable @typescript-eslint/naming-convention */
 

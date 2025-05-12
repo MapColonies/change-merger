@@ -3,7 +3,7 @@ import { RequestHandler } from 'express';
 import httpStatus from 'http-status-codes';
 import { injectable, inject } from 'tsyringe';
 import { RemoteChangeKind } from '@src/client/options';
-import { ChangeClient, IChangeClient } from '@src/client';
+import { ChangeClient } from '@src/client';
 import { SERVICES } from '../../common/constants';
 import { ChangeManager } from '../models/changeManager';
 import { InterpretAction, InterpretResult, MergeResult } from '../models/types';
@@ -28,7 +28,7 @@ export class ChangeController {
   public constructor(
     @inject(SERVICES.LOGGER) private readonly logger: Logger,
     @inject(ChangeManager) private readonly manager: ChangeManager,
-    @inject(ChangeClient) private readonly client: IChangeClient
+    @inject(ChangeClient) private readonly client: InstanceType<typeof ChangeClient>
   ) {}
 
   public mergeChanges: MergeChangesHandler = (req, res, next) => {
