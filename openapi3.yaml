@@ -1,7 +1,7 @@
 openapi: 3.0.1
 info:
   title: change-merger
-  description: Simple service for merging multiple OSM changes into one
+  description: service for merging multiple OSM changes into one and interpret changes by configured tags
   version: 1.4.0
   license:
     name: MIT
@@ -11,6 +11,8 @@ paths:
     get:
       operationId: getInterpretation
       summary: interpret a changeset by changesetId
+      tags:
+        - change
       parameters:
         - $ref: '#/components/parameters/changesetId'
         - $ref: '#/components/parameters/remote'
