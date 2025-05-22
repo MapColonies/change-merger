@@ -25,7 +25,7 @@ export class ChangeManager {
   public interpretChange(change: OsmXmlChange, actions?: InterpretAction[]): Partial<InterpretResult> {
     let created, deleted;
 
-    this.logger.info({ msg: 'started change interpret', actions });
+    this.logger.info({ msg: 'started change interpretation', actions });
 
     // due to xml parsing convertion possibly converting a single item array to just the item, we'll safely check beforehand
     if (!actions || actions.includes('create')) {
@@ -42,34 +42,36 @@ export class ChangeManager {
   private interpret(elements: ElementChange[]): InterpretedMapping[] {
     const mapping: InterpretedMapping[] = [];
 
-    elements.forEach((wrappedElement) => {
+    elements.forEach((wrappedElements) => {
       // skip relations
-      if ('relation' in wrappedElement) {
+      if ('relation' in wrappedElements) {
         return;
       }
+
+      let type: OsmElementType;
+      let elements: OsmXmlNode[] | OsmXmlWay[] = [];
 
       // determine if node or way
-      let element: OsmXmlNode | OsmXmlWay;
-      let type: OsmElementType;
-      if ('node' in wrappedElement) {
-        element = wrappedElement.node;
+      if ('node' in wrappedElements) {
         type = 'node';
-      } else {
-        element = wrappedElement.way;
+        elements = Array.isArray(wrappedElements.node) ? wrappedElements.node : [wrappedElements.node];
+      }
+      if ('way' in wrappedElements) {
         type = 'way';
+        elements = Array.isArray(wrappedElements.way) ? wrappedElements.way : [wrappedElements.way];
       }
 
-      // skip element with no tags
-      if (element.tag === undefined) {
-        return;
-      }
-
-      // if found, add to mapping the osmId, externalId pair
-      const tags = Array.isArray(element.tag) ? element.tag : [element.tag];
-      const externalIdTag = tags.find((tag) => tag.k === this.config.get('app.externalIdTag'));
-      if (externalIdTag) {
-        mapping.push({ type, osmId: +element.id, externalId: externalIdTag.v });
-      }
+      elements.forEach((element) => {
+        const tags = Array.isArray(element.tag) ? element.tag : element.tag ? [element.tag] : [];
+        const externalIdTag = tags.find((tag) => tag.k === this.config.get('app.externalIdTag'));
+        if (externalIdTag) {
+          mapping.push({
+            type,
+            osmId: +element.id,
+            externalId: externalIdTag.v,
+          });
+        }
+      });
     });
 
     return mapping;

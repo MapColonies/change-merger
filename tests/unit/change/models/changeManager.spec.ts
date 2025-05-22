@@ -272,5 +272,42 @@ describe('changeManager', function () {
 
       expect(interpretation).toMatchObject(expected);
     });
+
+    it('create an accurate interpretation result from a change consisting of nodes array under node property or ways array under way property', function () {
+      const change: OsmXmlChange = {
+        generator: 'test',
+        version: '0.6',
+        create: [
+          {
+            node: [
+              { id: 1, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value1' } },
+              { id: 2, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value2' } },
+            ],
+          },
+        ],
+        delete: [
+          {
+            way: [
+              { id: 3, changeset: 1, nd: [], version: 1, tag: { k: 'externalId', v: 'value3' } },
+              { id: 4, changeset: 1, nd: [], version: 1, tag: { k: 'externalId', v: 'value4' } },
+            ],
+          },
+        ],
+      };
+      const expected: InterpretResult = {
+        created: [
+          { type: 'node', osmId: 1, externalId: 'value1' },
+          { type: 'node', osmId: 2, externalId: 'value2' },
+        ],
+        deleted: [
+          { type: 'way', osmId: 3, externalId: 'value3' },
+          { type: 'way', osmId: 4, externalId: 'value4' },
+        ],
+      };
+
+      const interpretation = manager.interpretChange(change);
+
+      expect(interpretation).toMatchObject(expected);
+    });
   });
 });

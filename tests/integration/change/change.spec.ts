@@ -13,7 +13,7 @@ import { getSampleData } from '../../sampleData';
 import { ChangeWithMetadata, OsmXmlChange } from '../../../src/change/models/change';
 import { convertToXml } from '../../../src/change/utils/xml';
 import * as changeUtils from '../../../src/change/utils/';
-import { InterpretAction } from '../../../src/change/models/types';
+import { InterpretAction, InterpretResult } from '../../../src/change/models/types';
 import { ChangeRequestSender } from './helpers/requestSender';
 
 jest.mock('../../../src/change/utils', (): object => {
@@ -297,6 +297,77 @@ describe('change', function () {
         expect(response.body).toMatchObject(expected);
       });
 
+      it('should create an accurate interpretation result from a change consisting of nodes array and ways array', async function () {
+        const change: OsmXmlChange = {
+          generator: 'test',
+          version: '0.6',
+          create: [
+            { node: { id: 1, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'node1' } } },
+            { node: [{ id: 2, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'node2' } }] },
+            {
+              node: [
+                { id: 3, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'node3' } },
+                { id: 4, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'node4' } },
+              ],
+            },
+            { way: { id: 1, changeset: 1, nd: [], version: 1, tag: { k: 'externalId', v: 'way1' } } },
+            { way: [{ id: 2, changeset: 1, nd: [], version: 1, tag: { k: 'externalId', v: 'way2' } }] },
+            {
+              way: [
+                { id: 3, changeset: 1, nd: [], version: 1, tag: { k: 'externalId', v: 'way3' } },
+                { id: 4, changeset: 1, nd: [], version: 1, tag: { k: 'externalId', v: 'way4' } },
+              ],
+            },
+          ],
+          delete: [
+            { node: { id: 5, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'node5' } } },
+            { node: [{ id: 6, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'node6' } }] },
+            {
+              node: [
+                { id: 7, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'node7' } },
+                { id: 8, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'node8' } },
+              ],
+            },
+            { way: { id: 5, changeset: 1, nd: [], version: 1, tag: { k: 'externalId', v: 'way5' } } },
+            { way: [{ id: 6, changeset: 1, nd: [], version: 1, tag: { k: 'externalId', v: 'way6' } }] },
+            {
+              way: [
+                { id: 7, changeset: 1, nd: [], version: 1, tag: { k: 'externalId', v: 'way7' } },
+                { id: 8, changeset: 1, nd: [], version: 1, tag: { k: 'externalId', v: 'way8' } },
+              ],
+            },
+          ],
+        };
+
+        const expected = {
+          created: [
+            { type: 'node', osmId: 1, externalId: 'node1' },
+            { type: 'node', osmId: 2, externalId: 'node2' },
+            { type: 'node', osmId: 3, externalId: 'node3' },
+            { type: 'node', osmId: 4, externalId: 'node4' },
+            { type: 'way', osmId: 1, externalId: 'way1' },
+            { type: 'way', osmId: 2, externalId: 'way2' },
+            { type: 'way', osmId: 3, externalId: 'way3' },
+            { type: 'way', osmId: 4, externalId: 'way4' },
+          ],
+          deleted: [
+            { type: 'node', osmId: 5, externalId: 'node5' },
+            { type: 'node', osmId: 6, externalId: 'node6' },
+            { type: 'node', osmId: 7, externalId: 'node7' },
+            { type: 'node', osmId: 8, externalId: 'node8' },
+            { type: 'way', osmId: 5, externalId: 'way5' },
+            { type: 'way', osmId: 6, externalId: 'way6' },
+            { type: 'way', osmId: 7, externalId: 'way7' },
+            { type: 'way', osmId: 8, externalId: 'way8' },
+          ],
+        };
+
+        const response = await requestSender.postInterpretChange({ osmChange: change });
+
+        expect(response.status).toBe(httpStatusCodes.OK);
+        expect(response.body).toMatchObject(expected);
+      });
+
       it('should interpret an invalid osmchange as empty created and empty deleted result', async function () {
         const change = {
           created: 'bad',
@@ -379,6 +450,52 @@ describe('change', function () {
         const scope = remoteReplicationInterceptor.reply(httpStatusCodes.OK, xml);
 
         const response = await requestSender.getInterpretation('666', 'replication', ['delete']);
+
+        expect(response.status).toBe(httpStatusCodes.OK);
+        expect(response.body).toMatchObject(expected);
+        expect(unzipAsyncSpy).toHaveBeenCalledTimes(1);
+
+        scope.done();
+      });
+
+      it('should execute a get request to the remote replication and interpret the change with result even for array of nodes and ways', async function () {
+        const change: { osmChange: OsmXmlChange } = {
+          osmChange: {
+            generator: 'test',
+            version: '0.6',
+            create: [
+              {
+                node: [
+                  { id: 1, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value1' } },
+                  { id: 2, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value2' } },
+                ],
+              },
+            ],
+            delete: [
+              {
+                way: [
+                  { id: 3, changeset: 1, nd: [], version: 1, tag: { k: 'externalId', v: 'value3' } },
+                  { id: 4, changeset: 1, nd: [], version: 1, tag: { k: 'externalId', v: 'value4' } },
+                ],
+              },
+            ],
+          },
+        };
+        const expected: InterpretResult = {
+          created: [
+            { type: 'node', osmId: 1, externalId: 'value1' },
+            { type: 'node', osmId: 2, externalId: 'value2' },
+          ],
+          deleted: [
+            { type: 'way', osmId: 3, externalId: 'value3' },
+            { type: 'way', osmId: 4, externalId: 'value4' },
+          ],
+        };
+        const xml = convertToXml(change);
+        const unzipAsyncSpy = jest.spyOn(changeUtils, 'unzipAsync').mockResolvedValue(Buffer.from(xml));
+        const scope = remoteReplicationInterceptor.reply(httpStatusCodes.OK, xml);
+
+        const response = await requestSender.getInterpretation('666', 'replication');
 
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(response.body).toMatchObject(expected);

@@ -13,15 +13,15 @@ interface ChangeActionObj {
 }
 
 interface NodeChange {
-  node: OsmXmlNode;
+  node: OsmXmlNode | OsmXmlNode[];
 }
 
 interface WayChange {
-  way: OsmXmlWay;
+  way: OsmXmlWay | OsmXmlWay[];
 }
 
 interface RelationChange {
-  relation: unknown;
+  relation: unknown | unknown[];
 }
 
 export interface OsmXmlTag {
