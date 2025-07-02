@@ -412,7 +412,7 @@ describe('change', function () {
         scope.done();
       });
 
-      it('should execute a get request to the remote api and interpret the change with result', async function () {
+      it('should execute a get request to the remote api and interpret the change with result consisting created and deleted only', async function () {
         const change: { osmChange: OsmXmlChange } = {
           osmChange: {
             generator: 'test',
@@ -434,7 +434,33 @@ describe('change', function () {
         scope.done();
       });
 
-      it('should execute a get request to the remote replication and interpret the change with result', async function () {
+      it('should execute a get request to the remote api and interpret the change with result consisting of created, modified and deleted', async function () {
+        const change: { osmChange: OsmXmlChange } = {
+          osmChange: {
+            generator: 'test',
+            version: '0.6',
+            create: [{ node: { id: 1, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value1' } } }],
+            modify: [{ node: { id: 2, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value2' } } }],
+            delete: [{ node: { id: 3, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value3' } } }],
+          },
+        };
+        const expected = {
+          created: [{ osmId: 1, externalId: 'value1' }],
+          modified: [{ osmId: 2, externalId: 'value2' }],
+          deleted: [{ osmId: 3, externalId: 'value3' }],
+        };
+        const xml = convertToXml(change);
+        const scope = remoteApiInterceptor.reply(httpStatusCodes.OK, xml);
+
+        const response = await requestSender.getInterpretation('666', 'api', ['create', 'modify', 'delete']);
+
+        expect(response.status).toBe(httpStatusCodes.OK);
+        expect(response.body).toMatchObject(expected);
+
+        scope.done();
+      });
+
+      it('should execute a get request to the remote replication and interpret the change with result consisting only deleted', async function () {
         const change: { osmChange: OsmXmlChange } = {
           osmChange: {
             generator: 'test',
@@ -450,6 +476,30 @@ describe('change', function () {
         const scope = remoteReplicationInterceptor.reply(httpStatusCodes.OK, xml);
 
         const response = await requestSender.getInterpretation('666', 'replication', ['delete']);
+
+        expect(response.status).toBe(httpStatusCodes.OK);
+        expect(response.body).toMatchObject(expected);
+        expect(unzipAsyncSpy).toHaveBeenCalledTimes(1);
+
+        scope.done();
+      });
+
+      it('should execute a get request to the remote replication and interpret the change with result consisting only modified', async function () {
+        const change: { osmChange: OsmXmlChange } = {
+          osmChange: {
+            generator: 'test',
+            version: '0.6',
+            create: [{ node: { id: 1, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value1' } } }],
+            modify: [{ node: { id: 2, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value2' } } }],
+            delete: [{ node: { id: 3, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value3' } } }],
+          },
+        };
+        const expected = { modified: [{ osmId: 2, externalId: 'value2' }] };
+        const xml = convertToXml(change);
+        const unzipAsyncSpy = jest.spyOn(changeUtils, 'unzipAsync').mockResolvedValue(Buffer.from(xml));
+        const scope = remoteReplicationInterceptor.reply(httpStatusCodes.OK, xml);
+
+        const response = await requestSender.getInterpretation('666', 'replication', ['modify']);
 
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(response.body).toMatchObject(expected);
@@ -481,7 +531,7 @@ describe('change', function () {
             ],
           },
         };
-        const expected: InterpretResult = {
+        const expected: Partial<InterpretResult> = {
           created: [
             { type: 'node', osmId: 1, externalId: 'value1' },
             { type: 'node', osmId: 2, externalId: 'value2' },
@@ -517,7 +567,7 @@ describe('change', function () {
         const response = await requestSender.getInterpretation('666', 'replication', ['avi'] as unknown as InterpretAction[]);
 
         expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
-        expect(response.body).toStrictEqual({ message: 'request/query/action/0 must be equal to one of the allowed values: create, delete' });
+        expect(response.body).toStrictEqual({ message: 'request/query/action/0 must be equal to one of the allowed values: create, modify, delete' });
       });
 
       it('should return not found if remote api changeset was not found', async function () {

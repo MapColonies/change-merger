@@ -10,10 +10,14 @@ import { IdMapping, InterpretAction, InterpretedMapping, InterpretResult } from 
 
 @injectable()
 export class ChangeManager {
+  private readonly externalIdTag: string;
+
   public constructor(
     @inject(SERVICES.LOGGER) private readonly logger: Logger,
     @inject(SERVICES.CONFIG) private readonly config: ConfigType
-  ) {}
+  ) {
+    this.externalIdTag = this.config.get('app.externalIdTag') as string;
+  }
 
   public mergeChanges(changes: ChangeWithMetadata[], changesetId: number): [string, IdMapping[], string[]] {
     this.logger.info({ msg: 'started changes merging', count: changes.length });
@@ -22,21 +26,19 @@ export class ChangeManager {
     return [convertToXml({ osmChange: change }), idsToCreate, idsToDelete];
   }
 
-  public interpretChange(change: OsmXmlChange, actions?: InterpretAction[]): Partial<InterpretResult> {
-    let created, deleted;
+  public interpretChange(change: OsmXmlChange, actions: InterpretAction[] = ['create', 'delete']): Partial<InterpretResult> {
+    this.logger.info({ msg: 'started change interpretation', actions, extenralIdTag: this.externalIdTag });
 
-    this.logger.info({ msg: 'started change interpretation', actions });
+    const result = actions.reduce((acc, action) => {
+      const raw = change[action];
+      const interpreted = raw ? (Array.isArray(raw) ? this.interpret(raw) : this.interpret([raw])) : [];
 
-    // due to xml parsing convertion possibly converting a single item array to just the item, we'll safely check beforehand
-    if (!actions || actions.includes('create')) {
-      created = change.create ? (Array.isArray(change.create) ? this.interpret(change.create) : this.interpret([change.create])) : [];
-    }
+      const actionResult = action === 'create' ? 'created' : action === 'modify' ? 'modified' : 'deleted';
+      acc[actionResult] = interpreted;
+      return acc;
+    }, {} as Partial<InterpretResult>);
 
-    if (!actions || actions.includes('delete')) {
-      deleted = change.delete ? (Array.isArray(change.delete) ? this.interpret(change.delete) : this.interpret([change.delete])) : [];
-    }
-
-    return { created, deleted };
+    return result;
   }
 
   private interpret(elements: ElementChange[]): InterpretedMapping[] {
@@ -63,7 +65,7 @@ export class ChangeManager {
 
       elements.forEach((element) => {
         const tags = Array.isArray(element.tag) ? element.tag : element.tag ? [element.tag] : [];
-        const externalIdTag = tags.find((tag) => tag.k === this.config.get('app.externalIdTag'));
+        const externalIdTag = tags.find((tag) => tag.k === this.externalIdTag);
         if (externalIdTag) {
           mapping.push({
             type,

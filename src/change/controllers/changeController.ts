@@ -10,7 +10,7 @@ import { InterpretAction, InterpretResult, MergeResult } from '../models/types';
 import { ChangeWithMetadata, OsmXmlChange } from '../models/change';
 
 type MergeChangesHandler = RequestHandler<undefined, MergeResult, MergeChangesRequestBody>;
-type InterpretChangeHandler = RequestHandler<undefined, InterpretResult, { osmChange: OsmXmlChange }>;
+type InterpretChangeHandler = RequestHandler<undefined, Partial<InterpretResult>, { osmChange: OsmXmlChange }>;
 type GetChangeInterpretation = RequestHandler<
   { changesetId: string },
   Partial<InterpretResult>,
@@ -42,7 +42,7 @@ export class ChangeController {
 
   public interpretChange: InterpretChangeHandler = (req, res, next) => {
     try {
-      const result = this.manager.interpretChange(req.body.osmChange) as Required<InterpretResult>;
+      const result = this.manager.interpretChange(req.body.osmChange);
       return res.status(httpStatus.OK).json(result);
     } catch (error) {
       return next(error);

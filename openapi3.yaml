@@ -136,6 +136,7 @@ components:
       type: string
       enum:
         - create
+        - modify
         - delete
     remote:
       type: string
@@ -297,6 +298,10 @@ components:
       type: object
       properties:
         created:
+          type: array
+          items:
+            $ref: '#/components/schemas/InterpretedMapping'
+        modified:
           type: array
           items:
             $ref: '#/components/schemas/InterpretedMapping'
