@@ -18,7 +18,12 @@ export class ChangeRequestSender {
     return supertest.agent(this.app).post('/change/interpret').set('Content-Type', 'application/xml').send(xml);
   }
 
-  public async getInterpretation(changesetId: string, remote: RemoteChangeKind, action?: InterpretAction[]): Promise<supertest.Response> {
-    return supertest.agent(this.app).get(`/change/${changesetId}/interpret`).query({ remote, action });
+  public async getInterpretation(
+    changesetId: string,
+    remote: RemoteChangeKind,
+    action?: InterpretAction[],
+    lookupTags?: string[]
+  ): Promise<supertest.Response> {
+    return supertest.agent(this.app).get(`/change/${changesetId}/interpret`).query({ remote, action, lookupTags });
   }
 }

@@ -1,3 +1,5 @@
+import { OsmXmlTag } from './change';
+
 type OsmElementType = 'node' | 'way' | 'relation';
 
 export interface IdMapping {
@@ -17,6 +19,7 @@ export interface InterpretedMapping {
   type: OsmElementType;
   externalId: string;
   osmId: number;
+  tags?: OsmXmlTag[];
 }
 
 export interface InterpretResult {

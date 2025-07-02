@@ -26,12 +26,12 @@ export class ChangeManager {
     return [convertToXml({ osmChange: change }), idsToCreate, idsToDelete];
   }
 
-  public interpretChange(change: OsmXmlChange, actions: InterpretAction[] = ['create', 'delete']): Partial<InterpretResult> {
-    this.logger.info({ msg: 'started change interpretation', actions, extenralIdTag: this.externalIdTag });
+  public interpretChange(change: OsmXmlChange, actions: InterpretAction[] = ['create', 'delete'], lookupTags?: string[]): Partial<InterpretResult> {
+    this.logger.info({ msg: 'started change interpretation', actions, extenralIdTag: this.externalIdTag, lookupTags });
 
     const result = actions.reduce((acc, action) => {
       const raw = change[action];
-      const interpreted = raw ? (Array.isArray(raw) ? this.interpret(raw) : this.interpret([raw])) : [];
+      const interpreted = raw ? (Array.isArray(raw) ? this.interpret(raw, lookupTags) : this.interpret([raw], lookupTags)) : [];
 
       const actionResult = action === 'create' ? 'created' : action === 'modify' ? 'modified' : 'deleted';
       acc[actionResult] = interpreted;
@@ -41,7 +41,7 @@ export class ChangeManager {
     return result;
   }
 
-  private interpret(elements: ElementChange[]): InterpretedMapping[] {
+  private interpret(elements: ElementChange[], lookupTags?: string[]): InterpretedMapping[] {
     const mapping: InterpretedMapping[] = [];
 
     elements.forEach((wrappedElements) => {
@@ -66,11 +66,15 @@ export class ChangeManager {
       elements.forEach((element) => {
         const tags = Array.isArray(element.tag) ? element.tag : element.tag ? [element.tag] : [];
         const externalIdTag = tags.find((tag) => tag.k === this.externalIdTag);
+
         if (externalIdTag) {
+          const foundTags = tags.filter((tag) => lookupTags?.includes(tag.k));
+
           mapping.push({
             type,
             osmId: +element.id,
             externalId: externalIdTag.v,
+            tags: foundTags.length !== 0 ? foundTags : undefined,
           });
         }
       });

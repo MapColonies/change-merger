@@ -15,7 +15,7 @@ type GetChangeInterpretation = RequestHandler<
   { changesetId: string },
   Partial<InterpretResult>,
   undefined,
-  { remote: RemoteChangeKind; action?: InterpretAction[] }
+  { remote: RemoteChangeKind; action?: InterpretAction[]; lookupTags: string[] }
 >;
 
 export interface MergeChangesRequestBody {
@@ -52,11 +52,11 @@ export class ChangeController {
   public getChangeInterpretation: GetChangeInterpretation = async (req, res, next) => {
     try {
       const { changesetId } = req.params;
-      const { remote, action: actions } = req.query;
+      const { remote, action: actions, lookupTags } = req.query;
 
       const osmChange = await this.client.downloadChange(remote, changesetId);
 
-      const result = this.manager.interpretChange(osmChange, actions);
+      const result = this.manager.interpretChange(osmChange, actions, lookupTags);
 
       return res.status(httpStatus.OK).json(result);
     } catch (error) {

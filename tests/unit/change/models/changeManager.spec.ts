@@ -113,6 +113,67 @@ describe('changeManager', function () {
       expect(interpretation).toMatchObject(expected);
     });
 
+    it('should create an accurate interpretation of created, modified and deleted result from a change including lookup keys', function () {
+      const change: OsmXmlChange = {
+        generator: 'test',
+        version: '0.6',
+        create: [
+          {
+            node: {
+              id: 1,
+              changeset: 1,
+              lat: 1,
+              lon: 1,
+              version: 1,
+              tag: [
+                { k: 'externalId', v: 'value1' },
+                { k: 'historyId', v: 'history1' },
+              ],
+            },
+          },
+        ],
+        modify: [
+          {
+            node: {
+              id: 2,
+              changeset: 1,
+              lat: 1,
+              lon: 1,
+              version: 1,
+              tag: [
+                { k: 'externalId', v: 'value2' },
+                { k: 'historyId', v: 'history2' },
+              ],
+            },
+          },
+        ],
+        delete: [
+          {
+            node: {
+              id: 3,
+              changeset: 1,
+              lat: 1,
+              lon: 1,
+              version: 1,
+              tag: [
+                { k: 'externalId', v: 'value3' },
+                { k: 'historyId', v: 'history3' },
+              ],
+            },
+          },
+        ],
+      };
+      const expected: Partial<InterpretResult> = {
+        created: [{ type: 'node', osmId: 1, externalId: 'value1', tags: [{ k: 'historyId', v: 'history1' }] }],
+        modified: [{ type: 'node', osmId: 2, externalId: 'value2', tags: [{ k: 'historyId', v: 'history2' }] }],
+        deleted: [{ type: 'node', osmId: 3, externalId: 'value3', tags: [{ k: 'historyId', v: 'history3' }] }],
+      };
+
+      const interpretation = manager.interpretChange(change, ['create', 'modify', 'delete'], ['historyId']);
+
+      expect(interpretation).toMatchObject(expected);
+    });
+
     it('should create an accurate interpretation of only the created result from a change', function () {
       const change: OsmXmlChange = {
         generator: 'test',
@@ -126,6 +187,176 @@ describe('changeManager', function () {
       };
 
       const interpretation = manager.interpretChange(change, ['create']);
+
+      expect(interpretation).toMatchObject(expected);
+    });
+
+    it('should create an accurate interpretation from a change including found lookup keys', function () {
+      const change: OsmXmlChange = {
+        generator: 'test',
+        version: '0.6',
+        create: [
+          {
+            node: {
+              id: 1,
+              changeset: 1,
+              lat: 1,
+              lon: 1,
+              version: 1,
+              tag: [
+                { k: 'someKey', v: 'someValue' },
+                { k: 'externalId', v: 'value1' },
+                { k: 'someOtherKey', v: 'someOtherValue' },
+              ],
+            },
+          },
+        ],
+        modify: [
+          {
+            node: {
+              id: 2,
+              changeset: 1,
+              lat: 1,
+              lon: 1,
+              version: 1,
+              tag: [
+                { k: 'someKey', v: 'someValue' },
+                { k: 'externalId', v: 'value2' },
+                { k: 'historyId', v: 'history2' },
+              ],
+            },
+          },
+        ],
+        delete: [{ node: { id: 3, changeset: 1, lat: 1, lon: 1, version: 1 } }],
+      };
+      const expected: Partial<InterpretResult> = {
+        created: [{ type: 'node', osmId: 1, externalId: 'value1' }],
+        modified: [{ type: 'node', osmId: 2, externalId: 'value2', tags: [{ k: 'historyId', v: 'history2' }] }],
+      };
+
+      const interpretation = manager.interpretChange(change, ['create', 'modify', 'delete'], ['historyId']);
+
+      expect(interpretation).toMatchObject(expected);
+    });
+
+    it('should create an accurate interpretation from a change including multiple found lookup keys', function () {
+      const change: OsmXmlChange = {
+        generator: 'test',
+        version: '0.6',
+        create: [
+          {
+            node: {
+              id: 1,
+              changeset: 1,
+              lat: 1,
+              lon: 1,
+              version: 1,
+              tag: [
+                { k: 'someKey', v: 'someValue' },
+                { k: 'externalId', v: 'value1' },
+                { k: 'someOtherKey', v: 'someOtherValue' },
+              ],
+            },
+          },
+        ],
+        modify: [
+          {
+            node: {
+              id: 2,
+              changeset: 1,
+              lat: 1,
+              lon: 1,
+              version: 1,
+              tag: [
+                { k: 'someKey', v: 'someValue' },
+                { k: 'externalId', v: 'value2' },
+                { k: 'historyId', v: 'history2' },
+                { k: 'specialId', v: 'special2' },
+              ],
+            },
+          },
+        ],
+        delete: [{ node: { id: 3, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'specialId', v: 'special3' } } }],
+      };
+      const expected: Partial<InterpretResult> = {
+        created: [{ type: 'node', osmId: 1, externalId: 'value1' }],
+        modified: [
+          {
+            type: 'node',
+            osmId: 2,
+            externalId: 'value2',
+            tags: [
+              { k: 'historyId', v: 'history2' },
+              { k: 'specialId', v: 'special2' },
+            ],
+          },
+        ],
+      };
+
+      const interpretation = manager.interpretChange(change, ['create', 'modify', 'delete'], ['historyId', 'specialId']);
+
+      expect(interpretation).toMatchObject(expected);
+    });
+
+    it('should create an accurate interpretation of only created and deleted from a change including multiple found lookup keys', function () {
+      const change: OsmXmlChange = {
+        generator: 'test',
+        version: '0.6',
+        create: [
+          {
+            node: {
+              id: 1,
+              changeset: 1,
+              lat: 1,
+              lon: 1,
+              version: 1,
+              tag: [
+                { k: 'someKey', v: 'someValue' },
+                { k: 'externalId', v: 'value1' },
+                { k: 'someOtherKey', v: 'someOtherValue' },
+                { k: 'specialId', v: 'special1' },
+              ],
+            },
+          },
+        ],
+        modify: [
+          {
+            node: {
+              id: 2,
+              changeset: 1,
+              lat: 1,
+              lon: 1,
+              version: 1,
+              tag: [
+                { k: 'someKey', v: 'someValue' },
+                { k: 'externalId', v: 'value2' },
+                { k: 'historyId', v: 'history2' },
+                { k: 'specialId', v: 'special2' },
+              ],
+            },
+          },
+        ],
+        delete: [
+          {
+            node: {
+              id: 3,
+              changeset: 1,
+              lat: 1,
+              lon: 1,
+              version: 1,
+              tag: [
+                { k: 'historyId', v: 'history3' },
+                { k: 'specialId', v: 'special3' },
+              ],
+            },
+          },
+        ],
+      };
+      const expected: Partial<InterpretResult> = {
+        created: [{ type: 'node', osmId: 1, externalId: 'value1', tags: [{ k: 'specialId', v: 'special1' }] }],
+      };
+
+      const interpretation = manager.interpretChange(change, ['create', 'delete'], ['historyId', 'specialId']);
 
       expect(interpretation).toMatchObject(expected);
     });
@@ -345,5 +576,80 @@ describe('changeManager', function () {
 
       expect(interpretation).toMatchObject(expected);
     });
+  });
+
+  it('create an accurate interpretation result including lookup keys from a change consisting of nodes array under node property or ways array under way property', function () {
+    const change: OsmXmlChange = {
+      generator: 'test',
+      version: '0.6',
+      create: [
+        {
+          node: [
+            {
+              id: 1,
+              changeset: 1,
+              lat: 1,
+              lon: 1,
+              version: 1,
+              tag: [
+                { k: 'externalId', v: 'value1' },
+                { k: 'historyId', v: 'history1' },
+                { k: 'specialId', v: 'special1' },
+              ],
+            },
+            { id: 2, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value2' } },
+          ],
+        },
+      ],
+      delete: [
+        {
+          way: [
+            {
+              id: 3,
+              changeset: 1,
+              nd: [],
+              version: 1,
+              tag: [
+                { k: 'externalId', v: 'value3' },
+                { k: 'historyId', v: 'history3' },
+              ],
+            },
+            {
+              id: 4,
+              changeset: 1,
+              nd: [],
+              version: 1,
+              tag: [
+                { k: 'externalId', v: 'value4' },
+                { k: 'specialId', v: 'special4' },
+                { k: 'otherId', v: 'other4' },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    const expected: Partial<InterpretResult> = {
+      created: [
+        {
+          type: 'node',
+          osmId: 1,
+          externalId: 'value1',
+          tags: [
+            { k: 'historyId', v: 'history1' },
+            { k: 'specialId', v: 'special1' },
+          ],
+        },
+        { type: 'node', osmId: 2, externalId: 'value2' },
+      ],
+      deleted: [
+        { type: 'way', osmId: 3, externalId: 'value3', tags: [{ k: 'historyId', v: 'history3' }] },
+        { type: 'way', osmId: 4, externalId: 'value4', tags: [{ k: 'specialId', v: 'special4' }] },
+      ],
+    };
+
+    const interpretation = manager.interpretChange(change, ['create', 'modify', 'delete'], ['historyId', 'specialId']);
+
+    expect(interpretation).toMatchObject(expected);
   });
 });

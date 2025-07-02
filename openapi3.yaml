@@ -17,6 +17,7 @@ paths:
         - $ref: '#/components/parameters/changesetId'
         - $ref: '#/components/parameters/remote'
         - $ref: '#/components/parameters/action'
+        - $ref: '#/components/parameters/lookupTags'
       responses:
         '200':
           description: OK
@@ -103,6 +104,16 @@ components:
         uniqueItems: true
         items:
           $ref: '#/components/schemas/interpretAction'
+    lookupTags:
+      in: query
+      name: lookupTags
+      required: false
+      schema:
+        type: array
+        minLength: 1
+        uniqueItems: true
+        items:
+          $ref: '#/components/schemas/tagKey'
   schemas:
     error:
       type: object
@@ -143,6 +154,24 @@ components:
       enum:
         - api
         - replication
+    tagKey:
+      type: string
+      minLength: 1
+      maxLength: 255
+    tagValue:
+      type: string
+      minLength: 1
+    tag:
+      type: object
+      required:
+        - k
+        - v
+      properties:
+        k:
+          $ref: '#/components/schemas/tagKey'
+        v:
+          $ref: '#/components/schemas/tagValue'
+      additionalProperties: false
     BaseOsmElement:
       type: object
       required:
@@ -294,6 +323,10 @@ components:
           $ref: '#/components/schemas/externalId'
         osmId:
           $ref: '#/components/schemas/osmId'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/tag'
     InterpretResult:
       type: object
       properties:

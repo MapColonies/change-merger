@@ -460,6 +460,61 @@ describe('change', function () {
         scope.done();
       });
 
+      it('should execute a get request to the remote api and interpret the change including tag lookups with result consisting of created, modified and deleted', async function () {
+        const change: { osmChange: OsmXmlChange } = {
+          osmChange: {
+            generator: 'test',
+            version: '0.6',
+            create: [{ node: { id: 1, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value1' } } }],
+            modify: [
+              {
+                node: {
+                  id: 2,
+                  changeset: 1,
+                  lat: 1,
+                  lon: 1,
+                  version: 1,
+                  tag: [
+                    { k: 'externalId', v: 'value2' },
+                    { k: 'historyId', v: 'history2' },
+                  ],
+                },
+              },
+            ],
+            delete: [
+              {
+                node: {
+                  id: 3,
+                  changeset: 1,
+                  lat: 1,
+                  lon: 1,
+                  version: 1,
+                  tag: [
+                    { k: 'externalId', v: 'value3' },
+                    { k: 'someTag', v: 'someValue' },
+                    { k: 'historyId', v: 'history3' },
+                  ],
+                },
+              },
+            ],
+          },
+        };
+        const expected = {
+          created: [{ osmId: 1, externalId: 'value1' }],
+          modified: [{ osmId: 2, externalId: 'value2', tags: [{ k: 'historyId', v: 'history2' }] }],
+          deleted: [{ osmId: 3, externalId: 'value3', tags: [{ k: 'historyId', v: 'history3' }] }],
+        };
+        const xml = convertToXml(change);
+        const scope = remoteApiInterceptor.reply(httpStatusCodes.OK, xml);
+
+        const response = await requestSender.getInterpretation('666', 'api', ['create', 'modify', 'delete'], ['historyId', 'notFoundTag']);
+
+        expect(response.status).toBe(httpStatusCodes.OK);
+        expect(response.body).toMatchObject(expected);
+
+        scope.done();
+      });
+
       it('should execute a get request to the remote replication and interpret the change with result consisting only deleted', async function () {
         const change: { osmChange: OsmXmlChange } = {
           osmChange: {
@@ -555,62 +610,146 @@ describe('change', function () {
       });
     });
 
-    describe('Bad Path', function () {
-      it('should fail on duplicate action on remote api', async function () {
-        const response = await requestSender.getInterpretation('666', 'api', ['create', 'create', 'create']);
+    it('should execute a get request to the remote replication and interpret including lookup tags the change with result even for array of nodes and ways', async function () {
+      const change: { osmChange: OsmXmlChange } = {
+        osmChange: {
+          generator: 'test',
+          version: '0.6',
+          create: [
+            {
+              node: [
+                {
+                  id: 1,
+                  changeset: 1,
+                  lat: 1,
+                  lon: 1,
+                  version: 1,
+                  tag: [
+                    { k: 'externalId', v: 'value1' },
+                    { k: 'historyId', v: 'history1' },
+                    { k: 'specialId', v: 'special1' },
+                  ],
+                },
+                { id: 2, changeset: 1, lat: 1, lon: 1, version: 1, tag: { k: 'externalId', v: 'value2' } },
+              ],
+            },
+          ],
+          delete: [
+            {
+              way: [
+                {
+                  id: 3,
+                  changeset: 1,
+                  nd: [],
+                  version: 1,
+                  tag: [
+                    { k: 'externalId', v: 'value3' },
+                    { k: 'historyId', v: 'history3' },
+                  ],
+                },
+                {
+                  id: 4,
+                  changeset: 1,
+                  nd: [],
+                  version: 1,
+                  tag: [
+                    { k: 'externalId', v: 'value4' },
+                    { k: 'specialId', v: 'special4' },
+                    { k: 'otherId', v: 'other4' },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      };
+      const expected: Partial<InterpretResult> = {
+        created: [
+          {
+            type: 'node',
+            osmId: 1,
+            externalId: 'value1',
+            tags: [
+              { k: 'historyId', v: 'history1' },
+              { k: 'specialId', v: 'special1' },
+            ],
+          },
+          { type: 'node', osmId: 2, externalId: 'value2' },
+        ],
+        deleted: [
+          { type: 'way', osmId: 3, externalId: 'value3', tags: [{ k: 'historyId', v: 'history3' }] },
+          { type: 'way', osmId: 4, externalId: 'value4', tags: [{ k: 'specialId', v: 'special4' }] },
+        ],
+      };
+      const xml = convertToXml(change);
+      const unzipAsyncSpy = jest.spyOn(changeUtils, 'unzipAsync').mockResolvedValue(Buffer.from(xml));
+      const scope = remoteReplicationInterceptor.reply(httpStatusCodes.OK, xml);
 
-        expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
-        expect(response.body).toStrictEqual({ message: 'request/query/action must NOT have duplicate items (items ## 1 and 2 are identical)' });
-      });
+      const response = await requestSender.getInterpretation('666', 'replication', ['create', 'delete'], ['historyId', 'specialId']);
 
-      it('should fail on unknown action on remote replication', async function () {
-        const response = await requestSender.getInterpretation('666', 'replication', ['avi'] as unknown as InterpretAction[]);
+      expect(response.status).toBe(httpStatusCodes.OK);
+      expect(response.body).toMatchObject(expected);
+      expect(unzipAsyncSpy).toHaveBeenCalledTimes(1);
 
-        expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
-        expect(response.body).toStrictEqual({ message: 'request/query/action/0 must be equal to one of the allowed values: create, modify, delete' });
-      });
+      scope.done();
+    });
+  });
 
-      it('should return not found if remote api changeset was not found', async function () {
-        const scope = remoteApiInterceptor.reply(httpStatusCodes.NOT_FOUND);
+  describe('Bad Path', function () {
+    it('should fail on duplicate action on remote api', async function () {
+      const response = await requestSender.getInterpretation('666', 'api', ['create', 'create', 'create']);
 
-        const response = await requestSender.getInterpretation('666', 'api');
-
-        expect(response.status).toBe(httpStatusCodes.NOT_FOUND);
-
-        scope.done();
-      });
-
-      it('should return not found if remote replication changeset was not found', async function () {
-        const scope = remoteReplicationInterceptor.reply(httpStatusCodes.NOT_FOUND);
-
-        const response = await requestSender.getInterpretation('666', 'replication');
-
-        expect(response.status).toBe(httpStatusCodes.NOT_FOUND);
-
-        scope.done();
-      });
+      expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
+      expect(response.body).toStrictEqual({ message: 'request/query/action must NOT have duplicate items (items ## 1 and 2 are identical)' });
     });
 
-    describe('Sad Path', function () {
-      it('should return internal error if remote api errored', async function () {
-        const scope = remoteApiInterceptor.replyWithError({ message: 'error' });
+    it('should fail on unknown action on remote replication', async function () {
+      const response = await requestSender.getInterpretation('666', 'replication', ['avi'] as unknown as InterpretAction[]);
 
-        const response = await requestSender.getInterpretation('666', 'api');
+      expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
+      expect(response.body).toStrictEqual({ message: 'request/query/action/0 must be equal to one of the allowed values: create, modify, delete' });
+    });
 
-        expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
+    it('should return not found if remote api changeset was not found', async function () {
+      const scope = remoteApiInterceptor.reply(httpStatusCodes.NOT_FOUND);
 
-        scope.done();
-      });
+      const response = await requestSender.getInterpretation('666', 'api');
 
-      it('should return internal error if remote replication errored', async function () {
-        const scope = remoteReplicationInterceptor.replyWithError({ message: 'error' });
+      expect(response.status).toBe(httpStatusCodes.NOT_FOUND);
 
-        const response = await requestSender.getInterpretation('666', 'replication');
+      scope.done();
+    });
 
-        expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
+    it('should return not found if remote replication changeset was not found', async function () {
+      const scope = remoteReplicationInterceptor.reply(httpStatusCodes.NOT_FOUND);
 
-        scope.done();
-      });
+      const response = await requestSender.getInterpretation('666', 'replication');
+
+      expect(response.status).toBe(httpStatusCodes.NOT_FOUND);
+
+      scope.done();
+    });
+  });
+
+  describe('Sad Path', function () {
+    it('should return internal error if remote api errored', async function () {
+      const scope = remoteApiInterceptor.replyWithError({ message: 'error' });
+
+      const response = await requestSender.getInterpretation('666', 'api');
+
+      expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
+
+      scope.done();
+    });
+
+    it('should return internal error if remote replication errored', async function () {
+      const scope = remoteReplicationInterceptor.replyWithError({ message: 'error' });
+
+      const response = await requestSender.getInterpretation('666', 'replication');
+
+      expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
+
+      scope.done();
     });
   });
 });
