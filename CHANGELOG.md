@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.0](https://github.com/MapColonies/change-merger/compare/v1.4.0...v1.5.0) (2025-08-14)
+
+
+### Features
+
+* **change:** get change interpretation by remotes ([#97](https://github.com/MapColonies/change-merger/issues/97)) ([f738fbe](https://github.com/MapColonies/change-merger/commit/f738fbe47d76ec64c973c8a54118b1a7b50b57b1))
+
 ## [1.4.0](https://github.com/MapColonies/change-merger/compare/v1.3.5...v1.4.0) (2025-03-02)
 
 
