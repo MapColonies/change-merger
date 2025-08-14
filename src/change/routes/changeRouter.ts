@@ -10,6 +10,7 @@ export const changeRouterFactory: FactoryFunction<Router> = (dependencyContainer
 
   router.post('/merge', controller.mergeChanges);
   router.post('/interpret', controller.interpretChange);
+  router.get('/:changesetId/interpret', controller.getChangeInterpretation);
 
   return router;
 };

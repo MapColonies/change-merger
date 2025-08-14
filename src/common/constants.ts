@@ -20,3 +20,5 @@ export const stubHealthCheck = async (): Promise<void> => Promise.resolve();
 
 export const HEALTHCHECK = Symbol('Healthcheck');
 export const ON_SIGNAL = Symbol('OnSignal');
+
+export const X_API_KEY_HEADER = 'x-api-key';

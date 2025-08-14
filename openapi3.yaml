@@ -1,12 +1,36 @@
 openapi: 3.0.1
 info:
   title: change-merger
-  description: Simple service for merging multiple OSM changes into one
+  description: service for merging multiple OSM changes into one and interpret changes by configured tags
   version: 1.4.0
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
 paths:
+  /change/{changesetId}/interpret:
+    get:
+      operationId: getInterpretation
+      summary: interpret a changeset by changesetId
+      tags:
+        - change
+      parameters:
+        - $ref: '#/components/parameters/changesetId'
+        - $ref: '#/components/parameters/remote'
+        - $ref: '#/components/parameters/action'
+        - $ref: '#/components/parameters/lookupTags'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InterpretResult'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
   /change/interpret:
     post:
       operationId: interpretChange
@@ -57,6 +81,39 @@ paths:
               schema:
                 $ref: '#/components/schemas/error'
 components:
+  parameters:
+    changesetId:
+      in: path
+      name: changesetId
+      required: true
+      schema:
+        $ref: '#/components/schemas/osmId'
+    remote:
+      in: query
+      name: remote
+      required: true
+      schema:
+        $ref: '#/components/schemas/remote'
+    action:
+      in: query
+      name: action
+      required: false
+      schema:
+        type: array
+        minLength: 1
+        uniqueItems: true
+        items:
+          $ref: '#/components/schemas/interpretAction'
+    lookupTags:
+      in: query
+      name: lookupTags
+      required: false
+      schema:
+        type: array
+        minLength: 1
+        uniqueItems: true
+        items:
+          $ref: '#/components/schemas/tagKey'
   schemas:
     error:
       type: object
@@ -80,6 +137,41 @@ components:
       example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
       minLength: 1
       maxLength: 68
+    action:
+      type: string
+      enum:
+        - create
+        - modify
+        - delete
+    interpretAction:
+      type: string
+      enum:
+        - create
+        - modify
+        - delete
+    remote:
+      type: string
+      enum:
+        - api
+        - replication
+    tagKey:
+      type: string
+      minLength: 1
+      maxLength: 255
+    tagValue:
+      type: string
+      minLength: 1
+    tag:
+      type: object
+      required:
+        - k
+        - v
+      properties:
+        k:
+          $ref: '#/components/schemas/tagKey'
+        v:
+          $ref: '#/components/schemas/tagValue'
+      additionalProperties: false
     BaseOsmElement:
       type: object
       required:
@@ -166,11 +258,7 @@ components:
         externalId:
           $ref: '#/components/schemas/externalId'
         action:
-          type: string
-          enum:
-            - create
-            - modify
-            - delete
+          $ref: '#/components/schemas/action'
         change:
           $ref: '#/components/schemas/OsmChange'
         tempOsmId:
@@ -235,10 +323,18 @@ components:
           $ref: '#/components/schemas/externalId'
         osmId:
           $ref: '#/components/schemas/osmId'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/tag'
     InterpretResult:
       type: object
       properties:
         created:
+          type: array
+          items:
+            $ref: '#/components/schemas/InterpretedMapping'
+        modified:
           type: array
           items:
             $ref: '#/components/schemas/InterpretedMapping'

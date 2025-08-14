@@ -2,14 +2,21 @@ import { Logger } from '@map-colonies/js-logger';
 import { RequestHandler } from 'express';
 import httpStatus from 'http-status-codes';
 import { injectable, inject } from 'tsyringe';
+import { RemoteChangeKind } from '@src/client/options';
+import { ChangeClient } from '@src/client';
 import { SERVICES } from '../../common/constants';
 import { ChangeManager } from '../models/changeManager';
-import { InterpretResult, MergeResult } from '../models/types';
+import { InterpretAction, InterpretResult, MergeResult } from '../models/types';
 import { ChangeWithMetadata, OsmXmlChange } from '../models/change';
 
 type MergeChangesHandler = RequestHandler<undefined, MergeResult, MergeChangesRequestBody>;
-
-type InterpretChangeHandler = RequestHandler<undefined, InterpretResult, { osmChange: OsmXmlChange }>;
+type InterpretChangeHandler = RequestHandler<undefined, Partial<InterpretResult>, { osmChange: OsmXmlChange }>;
+type GetChangeInterpretation = RequestHandler<
+  { changesetId: string },
+  Partial<InterpretResult>,
+  undefined,
+  { remote: RemoteChangeKind; action?: InterpretAction[]; lookupTags: string[] }
+>;
 
 export interface MergeChangesRequestBody {
   changesetId: number;
@@ -20,7 +27,8 @@ export interface MergeChangesRequestBody {
 export class ChangeController {
   public constructor(
     @inject(SERVICES.LOGGER) private readonly logger: Logger,
-    @inject(ChangeManager) private readonly manager: ChangeManager
+    @inject(ChangeManager) private readonly manager: ChangeManager,
+    @inject(ChangeClient) private readonly client: InstanceType<typeof ChangeClient>
   ) {}
 
   public mergeChanges: MergeChangesHandler = (req, res, next) => {
@@ -35,6 +43,21 @@ export class ChangeController {
   public interpretChange: InterpretChangeHandler = (req, res, next) => {
     try {
       const result = this.manager.interpretChange(req.body.osmChange);
+      return res.status(httpStatus.OK).json(result);
+    } catch (error) {
+      return next(error);
+    }
+  };
+
+  public getChangeInterpretation: GetChangeInterpretation = async (req, res, next) => {
+    try {
+      const { changesetId } = req.params;
+      const { remote, action: actions, lookupTags } = req.query;
+
+      const osmChange = await this.client.downloadChange(remote, changesetId);
+
+      const result = this.manager.interpretChange(osmChange, actions, lookupTags);
+
       return res.status(httpStatus.OK).json(result);
     } catch (error) {
       return next(error);

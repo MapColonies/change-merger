@@ -30,6 +30,16 @@
     }
   },
   "app": {
-    "externalIdTag": "externalId"
+    "externalIdTag": "externalId",
+    "remote": {
+      "api": {
+        "baseUrl": "https://api.openstreetmap.org/api/0.6/",
+        "timeoutMs": 10000
+      },
+      "replication": {
+        "baseUrl": "https://download.geofabrik.de/europe/andorra-updates/",
+        "timeoutMs": 10000
+      }
+    }
   }
 }

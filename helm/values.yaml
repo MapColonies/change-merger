@@ -80,6 +80,19 @@ env:
     url: http://localhost:55681/v1/metrics
   app:
     externalIdTag: 'externalId'
+    remote:
+      api:
+        baseUrl: 'https://api.openstreetmap.org/api/0.6/'
+        timeoutMs: 10000
+        # xApiKey:
+        # username:
+        # password:
+      replication:
+        baseUrl: "https://download.geofabrik.de/europe/andorra-updates/"
+        timeoutMs: 10000
+        # xApiKey:
+        # username:
+        # password:
 
 resources:
   enabled: true

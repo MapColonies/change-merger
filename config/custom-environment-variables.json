@@ -40,6 +40,28 @@
     }
   },
   "app": {
-    "externalIdTag": "APP_EXTERNAL_ID_TAG"
+    "externalIdTag": "APP_EXTERNAL_ID_TAG",
+    "remote": {
+      "api": {
+        "baseUrl": "APP_REMOTE_API_BASE_URL",
+        "xApiKey": "APP_REMOTE_API_X_API_KEY",
+        "username": "APP_REMOTE_API_USERNAME",
+        "password": "APP_REMOTE_API_PASSWORD",
+        "timeoutMs": {
+          "__name": "APP_REMOTE_API_TIMEOUT_MS",
+          "__format": "number"
+        }
+      },
+      "replication": {
+        "baseUrl": "APP_REMOTE_REPLICATION_BASE_URL",
+        "xApiKey": "APP_REMOTE_REPLICATION_X_API_KEY",
+        "username": "APP_REMOTE_REPLICATION_USERNAME",
+        "password": "APP_REMOTE_REPLICATION_PASSWORD",
+        "timeoutMs": {
+          "__name": "APP_REMOTE_REPLICATION_TIMEOUT_MS",
+          "__format": "number"
+        }
+      }
+    }
   }
 }
