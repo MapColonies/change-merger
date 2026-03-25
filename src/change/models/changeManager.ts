@@ -5,8 +5,8 @@ import { OsmElementType } from '@map-colonies/node-osm-elements';
 import { SERVICES } from '../../common/constants';
 import { convertToXml } from '../utils/xml';
 import { mergeChanges } from './merger';
-import { ChangeWithMetadata, ElementChange, OsmXmlChange, OsmXmlNode, OsmXmlWay } from './change';
-import { IdMapping, InterpretAction, InterpretedMapping, InterpretResult } from './types';
+import { ChangeWithMetadata, ElementChange, OsmXmlChange, OsmXmlNode, OsmXmlTag, OsmXmlWay } from './change';
+import { ACTION_KEY_MAP, IdMapping, InterpretAction, InterpretedMapping, InterpretResult } from './types';
 
 @injectable()
 export class ChangeManager {
@@ -27,58 +27,76 @@ export class ChangeManager {
   }
 
   public interpretChange(change: OsmXmlChange, actions: InterpretAction[] = ['create', 'delete'], lookupTags?: string[]): Partial<InterpretResult> {
-    this.logger.info({ msg: 'started change interpretation', actions, extenralIdTag: this.externalIdTag, lookupTags });
+    this.logger.info({ msg: 'started change interpretation', actions, externalIdTag: this.externalIdTag, lookupTags });
 
-    const result = actions.reduce((acc, action) => {
+    const result: Partial<InterpretResult> = {};
+    const lookupSet = lookupTags ? new Set(lookupTags) : undefined;
+
+    for (const action of actions) {
+      const key = ACTION_KEY_MAP[action];
+
+      result[key] = [];
+
       const raw = change[action];
-      const interpreted = raw ? (Array.isArray(raw) ? this.interpret(raw, lookupTags) : this.interpret([raw], lookupTags)) : [];
+      if (!raw) {
+        continue;
+      }
 
-      const actionResult = action === 'create' ? 'created' : action === 'modify' ? 'modified' : 'deleted';
-      acc[actionResult] = interpreted;
-      return acc;
-    }, {} as Partial<InterpretResult>);
+      const elements = Array.isArray(raw) ? raw : [raw];
+      result[key] = this.interpret(elements, lookupSet);
+    }
 
     return result;
   }
 
-  private interpret(elements: ElementChange[], lookupTags?: string[]): InterpretedMapping[] {
+  private interpret(wrappedElements: ElementChange[], lookupSet?: Set<string>): InterpretedMapping[] {
     const mapping: InterpretedMapping[] = [];
 
-    elements.forEach((wrappedElements) => {
-      // skip relations
-      if ('relation' in wrappedElements) {
-        return;
+    for (const wrapped of wrappedElements) {
+      if ('relation' in wrapped) {
+        continue;
       }
 
       let type: OsmElementType;
-      let elements: OsmXmlNode[] | OsmXmlWay[] = [];
+      let elements: OsmXmlNode[] | OsmXmlWay[];
 
-      // determine if node or way
-      if ('node' in wrappedElements) {
+      if ('node' in wrapped) {
         type = 'node';
-        elements = Array.isArray(wrappedElements.node) ? wrappedElements.node : [wrappedElements.node];
-      }
-      if ('way' in wrappedElements) {
+        elements = Array.isArray(wrapped.node) ? wrapped.node : [wrapped.node];
+      } else if ('way' in wrapped) {
         type = 'way';
-        elements = Array.isArray(wrappedElements.way) ? wrappedElements.way : [wrappedElements.way];
+        elements = Array.isArray(wrapped.way) ? wrapped.way : [wrapped.way];
+      } else {
+        continue;
       }
 
-      elements.forEach((element) => {
+      for (const element of elements) {
         const tags = Array.isArray(element.tag) ? element.tag : element.tag ? [element.tag] : [];
-        const externalIdTag = tags.find((tag) => tag.k === this.externalIdTag);
 
-        if (externalIdTag) {
-          const foundTags = tags.filter((tag) => lookupTags?.includes(tag.k));
+        let externalIdTag: OsmXmlTag | undefined;
+        const foundTags: OsmXmlTag[] = [];
 
-          mapping.push({
-            type,
-            osmId: +element.id,
-            externalId: externalIdTag.v,
-            tags: foundTags.length !== 0 ? foundTags : undefined,
-          });
+        for (const tag of tags) {
+          if (tag.k === this.externalIdTag) {
+            externalIdTag = tag;
+          }
+          if (lookupSet?.has(tag.k) === true) {
+            foundTags.push(tag);
+          }
         }
-      });
-    });
+
+        if (!externalIdTag) {
+          continue;
+        }
+
+        mapping.push({
+          type,
+          osmId: +element.id,
+          externalId: externalIdTag.v,
+          tags: foundTags.length > 0 ? foundTags : undefined,
+        });
+      }
+    }
 
     return mapping;
   }
