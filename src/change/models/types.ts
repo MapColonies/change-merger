@@ -15,6 +15,12 @@ export interface MergeResult {
 
 export type InterpretAction = 'create' | 'modify' | 'delete';
 
+export const ACTION_KEY_MAP = {
+  create: 'created',
+  modify: 'modified',
+  delete: 'deleted',
+} satisfies Record<InterpretAction, keyof InterpretResult>;
+
 export interface InterpretedMapping {
   type: OsmElementType;
   externalId: string;
