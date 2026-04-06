@@ -82,6 +82,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+security:
+  - {}
 components:
   parameters:
     changesetId:
